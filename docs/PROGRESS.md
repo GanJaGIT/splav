@@ -12,7 +12,7 @@
 
 <!-- Дата — что сделано — ID требований. Новые записи сверху. -->
 
-- 2026-10-11 — Этап 0 закрыт. `npm run verify`: typecheck, lint (ESLint + Prettier), 21 unit-тест, тест уровней, build, zip, check:build, 9 e2e-смоуков (по 3 в Chromium, Firefox, WebKit) — всё зелёное.
+- 2026-10-11 — Этап 0 закрыт. `npm run verify`: typecheck, lint (ESLint + Prettier), 20 unit-тестов, 1 тест уровней, build, zip, check:build, 9 e2e-смоуков (по 3 в Chromium, Firefox, WebKit) — всё зелёное.
 - 2026-10-11 — QA-03: смоук на e2e-сборке в трёх движках — загрузка без ошибок и предупреждений в консоли, `gameReady()` ровно один раз, экран загрузки убран, поле и 4 кнопки бустеров на месте; INP-06 (`contextmenu` отменён, `user-select: none`, `overflow: hidden`); YG-06 (`?lang=ru|en|tr`).
 - 2026-10-11 — QA-05: `npm run verify` (`scripts/verify.ts`) — typecheck → lint → unit → levels → build → zip → check:build → e2e, остановка на первой ошибке, сводка с временем шагов.
 - 2026-10-11 — BLD-02, BLD-03, PERF-01: `npm run zip` → `release/splav-<версия>.zip`; `npm run check:build` — `index.html` в корне, имена `a–z 0–9 . _ -`, нет `.map` и `purchases-catalog.json`, размер ≤ 15 МБ, нет `http(s)://` (кроме пространств имён XML), нет ссылок на S3, нет тестовых хуков `__game`, `/sdk.js` до кода игры, относительные пути.
