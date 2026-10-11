@@ -1,0 +1,10 @@
+dist/
+dist-e2e/
+release/
+test-results/
+coverage/
+node_modules/
+.claude/
+docs/
+package-lock.json
+*.md
