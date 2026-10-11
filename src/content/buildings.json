@@ -1,0 +1,30 @@
+{
+  "buildings": [
+    { "id": "pier", "price": 60, "effect": { "type": "daily" }, "resident": "fisher" },
+    {
+      "id": "shed",
+      "price": 200,
+      "effect": { "type": "backwater", "value": 6 },
+      "resident": "carpenter"
+    },
+    {
+      "id": "mill",
+      "price": 450,
+      "effect": { "type": "chapter", "value": 2 },
+      "resident": "miller"
+    },
+    { "id": "flowerbed", "price": 700, "effect": { "type": "dailyGift" }, "resident": "gardener" },
+    {
+      "id": "bathhouse",
+      "price": 1000,
+      "effect": { "type": "coinBonus", "value": 0.1 },
+      "resident": "stoker"
+    },
+    {
+      "id": "bridge",
+      "price": 1400,
+      "effect": { "type": "chapter", "value": 3 },
+      "resident": "builder"
+    }
+  ]
+}

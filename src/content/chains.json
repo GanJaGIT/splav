@@ -1,0 +1,8 @@
+{
+  "chains": [
+    { "id": "wood", "maxLevel": 6, "unlockChapter": 1 },
+    { "id": "garden", "maxLevel": 6, "unlockChapter": 1 },
+    { "id": "stone", "maxLevel": 6, "unlockChapter": 2 },
+    { "id": "fish", "maxLevel": 6, "unlockChapter": 3 }
+  ]
+}

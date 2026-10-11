@@ -1,0 +1,8 @@
+{
+  "boosters": [
+    { "id": "dam", "unlockLevel": "c1-09", "key": "Digit1" },
+    { "id": "hook", "unlockLevel": "c2-05", "key": "Digit2" },
+    { "id": "joker", "unlockLevel": "c2-08", "key": "Digit3" },
+    { "id": "net", "unlockLevel": "c3-04", "key": "Digit4" }
+  ]
+}
