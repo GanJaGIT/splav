@@ -1,0 +1,14 @@
+{
+  "lang.name": "Русский",
+  "game.title": "Сплав",
+  "hud.pause": "Пауза",
+  "hud.lives": "Сердечки",
+  "hud.coins": "Монеты",
+  "hud.combo": "Комбо",
+  "hud.boosters": "Бустеры",
+  "booster.dam.name": "Плотина",
+  "booster.hook.name": "Багор",
+  "booster.joker.name": "Радужная капля",
+  "booster.joker.short": "Капля",
+  "booster.net.name": "Сеть"
+}

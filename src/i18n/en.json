@@ -1,0 +1,14 @@
+{
+  "lang.name": "English",
+  "game.title": "Merge River",
+  "hud.pause": "Pause",
+  "hud.lives": "Lives",
+  "hud.coins": "Coins",
+  "hud.combo": "Combo",
+  "hud.boosters": "Boosters",
+  "booster.dam.name": "Dam",
+  "booster.hook.name": "Hook",
+  "booster.joker.name": "Rainbow drop",
+  "booster.joker.short": "Drop",
+  "booster.net.name": "Net"
+}
