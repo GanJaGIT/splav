@@ -10,5 +10,9 @@
   "booster.hook.name": "Багор",
   "booster.joker.name": "Радужная капля",
   "booster.joker.short": "Капля",
-  "booster.net.name": "Сеть"
+  "booster.net.name": "Сеть",
+  "level.c1-01.name": "Первая щепка",
+  "level.c1-02.name": "Семечко",
+  "level.c1-03.name": "Первая пристань",
+  "level.c1-04.name": "Про запас"
 }

@@ -10,5 +10,9 @@
   "booster.hook.name": "Hook",
   "booster.joker.name": "Rainbow drop",
   "booster.joker.short": "Drop",
-  "booster.net.name": "Net"
+  "booster.net.name": "Net",
+  "level.c1-01.name": "The First Chip",
+  "level.c1-02.name": "A Little Seed",
+  "level.c1-03.name": "The First Pier",
+  "level.c1-04.name": "Saved for Later"
 }

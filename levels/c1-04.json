@@ -1,0 +1,57 @@
+{
+  "id": "c1-04",
+  "chapter": 1,
+  "lanes": 3,
+  "rows": 7,
+  "stepTicks": 22,
+  "seed": 1401,
+  "waitFirstMerge": false,
+  "spawn": {
+    "perStep": [1, 1],
+    "weights": [
+      {
+        "chain": "wood",
+        "level": 1,
+        "w": 5
+      },
+      {
+        "chain": "garden",
+        "level": 1,
+        "w": 4
+      },
+      {
+        "chain": "wood",
+        "level": 2,
+        "w": 1
+      }
+    ]
+  },
+  "initial": [],
+  "script": [],
+  "piers": [
+    {
+      "col": 4,
+      "row": 2,
+      "resident": "carpenter",
+      "orders": [
+        {
+          "chain": "garden",
+          "level": 4
+        },
+        {
+          "chain": "wood",
+          "level": 4
+        },
+        {
+          "chain": "garden",
+          "level": 4
+        }
+      ]
+    }
+  ],
+  "obstacles": [],
+  "backwater": 5,
+  "lives": 3,
+  "intro": "bank",
+  "gift": null
+}

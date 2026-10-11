@@ -1,0 +1,26 @@
+{
+  "id": "c1-01",
+  "chapter": 1,
+  "lanes": 3,
+  "rows": 7,
+  "stepTicks": 20,
+  "seed": 1101,
+  "waitFirstMerge": true,
+  "spawn": {
+    "perStep": [1, 1],
+    "weights": [{ "chain": "wood", "level": 1, "w": 1 }]
+  },
+  "initial": [
+    { "col": 1, "row": 3, "chain": "wood", "level": 1 },
+    { "col": 3, "row": 3, "chain": "wood", "level": 1 }
+  ],
+  "script": [],
+  "piers": [
+    { "col": 4, "row": 2, "resident": "fisher", "orders": [{ "chain": "wood", "level": 3 }] }
+  ],
+  "obstacles": [],
+  "backwater": 5,
+  "lives": 3,
+  "intro": "merge",
+  "gift": null
+}
