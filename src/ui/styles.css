@@ -1,0 +1,184 @@
+[hidden] {
+  display: none !important;
+}
+
+/* UI-13, UI-14: the active area sits inside the safe-area viewport, the rest is background. */
+#viewport {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.08), transparent 60%), #2f6b45;
+}
+
+#stage {
+  position: relative;
+  overflow: hidden;
+}
+
+#canvas-host {
+  position: absolute;
+  inset: 0;
+}
+
+#canvas-host canvas {
+  display: block;
+}
+
+/* INP-07: the overlay itself lets touches through to the field, its controls do not. */
+#ui {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+#ui > * {
+  position: absolute;
+  pointer-events: auto;
+}
+
+.hud-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 6px;
+  background: rgba(23, 63, 40, 0.55);
+}
+
+.hud-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.hud-button svg {
+  width: 26px;
+  height: 26px;
+  fill: currentColor;
+}
+
+.hud-lives {
+  display: flex;
+  gap: 2px;
+}
+
+.hud-heart svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+  fill: #ff6b6b;
+  stroke: #7a1f1f;
+  stroke-width: 1.5;
+}
+
+.hud-spacer {
+  flex: 1;
+}
+
+.hud-combo,
+.hud-coins {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.25);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.hud-coins svg {
+  width: 22px;
+  height: 22px;
+  fill: #ffd75e;
+  stroke: #9a6a00;
+}
+
+.hud-boosters {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 2px 6px;
+}
+
+.hud-boosters.column {
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 8px 4px;
+  gap: 8px;
+}
+
+.hud-booster {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  flex: 1 1 0;
+  max-width: 96px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 4px;
+  line-height: 1.1;
+  border: 2px solid #1f4d2e;
+  border-radius: 12px;
+  background: #f4e7c5;
+  color: #2b3a24;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hud-boosters.column .hud-booster {
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+}
+
+.hud-boosters.column .hud-booster-label {
+  display: none;
+}
+
+.hud-booster svg {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  fill: #3b6fa0;
+  stroke: #3b6fa0;
+}
+
+.hud-booster-label {
+  white-space: nowrap;
+}
+
+.hud-booster-count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  border-radius: 10px;
+  background: #1f4d2e;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+}
