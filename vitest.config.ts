@@ -8,5 +8,12 @@ export default defineConfig({
   test: {
     include: ['tests/unit/**/*.test.ts', 'tests/levels/**/*.test.ts'],
     environment: 'node',
+    coverage: {
+      provider: 'v8',
+      include: ['src/sim/**/*.ts'],
+      reporter: ['text'],
+      // Stage 1 acceptance: at least 90% of src/sim lines are covered.
+      thresholds: { lines: 90 },
+    },
   },
 });
