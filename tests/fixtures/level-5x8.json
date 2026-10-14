@@ -1,0 +1,61 @@
+{
+  "id": "c3-90",
+  "chapter": 3,
+  "lanes": 5,
+  "rows": 8,
+  "stepTicks": 20,
+  "seed": 3,
+  "waitFirstMerge": false,
+  "spawn": {
+    "perStep": [1, 2],
+    "weights": [
+      { "chain": "wood", "level": 1, "w": 1 },
+      { "chain": "garden", "level": 1, "w": 1 },
+      { "chain": "stone", "level": 1, "w": 1 },
+      { "chain": "fish", "level": 1, "w": 1 }
+    ]
+  },
+  "initial": [
+    { "col": 1, "row": 2, "chain": "wood", "level": 6 },
+    { "col": 2, "row": 2, "chain": "garden", "level": 6 },
+    { "col": 3, "row": 2, "chain": "stone", "level": 6 },
+    { "col": 4, "row": 2, "chain": "fish", "level": 6 },
+    { "col": 1, "row": 4, "chain": "wood", "level": 3 },
+    { "col": 2, "row": 4, "chain": "garden", "level": 4 },
+    { "col": 4, "row": 4, "chain": "fish", "level": 5 },
+    { "col": 0, "row": 6, "chain": "stone", "level": 2 },
+    { "col": 6, "row": 7, "chain": "wood", "level": 1 }
+  ],
+  "script": [],
+  "piers": [
+    {
+      "col": 0,
+      "row": 1,
+      "resident": "fisher",
+      "orders": [
+        { "chain": "fish", "level": 4 },
+        { "chain": "fish", "level": 5 }
+      ]
+    },
+    { "col": 6, "row": 2, "resident": "miller", "orders": [{ "chain": "stone", "level": 5 }] },
+    {
+      "col": 0,
+      "row": 4,
+      "resident": "gardener",
+      "orders": [
+        { "chain": "garden", "level": 4 },
+        { "chain": "wood", "level": 5 },
+        { "chain": "garden", "level": 5 }
+      ]
+    }
+  ],
+  "obstacles": [
+    { "type": "rock", "col": 3, "row": 5 },
+    { "type": "snag", "col": 5, "row": 3 },
+    { "type": "rock", "col": 6, "row": 5 }
+  ],
+  "backwater": 5,
+  "lives": 3,
+  "intro": null,
+  "gift": null
+}

@@ -6,8 +6,8 @@ useBrowsersPath();
 
 const PORT = 4183;
 
-// QA-03: the smoke tests run in Chromium, Firefox and WebKit against the e2e build, which is the
-// release build plus the DEV-02 hooks.
+// QA-03: the smoke tests (@smoke) run in Chromium, Firefox and WebKit, the rest in Chromium and
+// mobile WebKit, against the e2e build: the release build plus the DEV-02 hooks.
 export default defineConfig({
   testDir: 'tests/e2e',
   outputDir: 'test-results/e2e',
@@ -33,8 +33,10 @@ export default defineConfig({
         launchOptions: { args: ['--use-angle=swiftshader'] },
       },
     },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] }, grep: /@smoke/ },
+    { name: 'webkit', use: { ...devices['Desktop Safari'] }, grep: /@smoke/ },
+    // QA-03: everything but the smoke also runs in mobile WebKit emulation.
+    { name: 'mobile-webkit', use: { ...devices['iPhone 13'] }, grepInvert: /@smoke|QA-04/ },
   ],
   webServer: {
     command: `npm run build:e2e && npx vite preview --mode e2e --outDir dist-e2e --port ${PORT} --strictPort`,

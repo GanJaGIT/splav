@@ -21,7 +21,9 @@ function collectErrors(page: Page): string[] {
   return errors;
 }
 
-test('loads without console errors and calls ready() exactly once (YG-02)', async ({ page }) => {
+test('@smoke loads without console errors and calls ready() exactly once (YG-02)', async ({
+  page,
+}) => {
   const errors = collectErrors(page);
   await page.goto('/');
   await page.waitForFunction(
@@ -41,7 +43,7 @@ test('loads without console errors and calls ready() exactly once (YG-02)', asyn
   expect(errors).toEqual([]);
 });
 
-test('INP-06: no context menu and no text selection', async ({ page }) => {
+test('@smoke INP-06: no context menu and no text selection', async ({ page }) => {
   await page.goto('/');
   await page.waitForFunction(() => (window as unknown as Hooks).__game !== undefined);
   const prevented = await page.evaluate(() => {
@@ -61,7 +63,7 @@ test('INP-06: no context menu and no text selection', async ({ page }) => {
   expect(style.overflow).toBe('hidden');
 });
 
-test('YG-06: ?lang picks the language', async ({ page }) => {
+test('@smoke YG-06: ?lang picks the language', async ({ page }) => {
   await page.goto('/?lang=ru');
   await expect(page).toHaveTitle('Сплав');
   await page.goto('/?lang=en');
