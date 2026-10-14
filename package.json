@@ -26,7 +26,7 @@
     "verify": "tsx scripts/verify.ts",
     "sim": "tsx scripts/sim-cli.ts",
     "bench": "tsx scripts/bench.ts",
-    "balance": "tsx scripts/stub.ts balance 3",
+    "balance": "tsx scripts/balance.ts",
     "art": "tsx scripts/stub.ts art 5",
     "promo": "tsx scripts/stub.ts promo 5"
   },
