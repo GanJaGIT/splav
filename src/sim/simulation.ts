@@ -189,8 +189,7 @@ export function levelResult(s: SimState, firstWin: boolean): LevelResult {
 
 /** SIM-10…SIM-13: one tick. Returns the same (mutated) state. */
 export function step(s: SimState, actions: readonly Action[] = []): SimState {
-  s.events = [];
-  for (const a of actions) applyAction(s, a);
+  applyActions(s, actions);
   if (s.status !== 'playing') return s;
 
   // SIM-11
@@ -219,6 +218,16 @@ export function step(s: SimState, actions: readonly Action[] = []): SimState {
     s.events.push({ type: 'lost-level' });
   }
   s.tick += 1;
+  return s;
+}
+
+/**
+ * SIM-10 alone: applies actions without advancing time. The interface uses it when the game is
+ * paused (YG-04: the held item goes back while the river stands); `step` starts with it.
+ */
+export function applyActions(s: SimState, actions: readonly Action[]): SimState {
+  s.events = [];
+  for (const a of actions) applyAction(s, a);
   return s;
 }
 

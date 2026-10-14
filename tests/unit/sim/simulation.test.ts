@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  applyActions,
   cellAt,
   createState,
   currentOrder,
@@ -100,5 +101,19 @@ describe('level requirements (§2.13)', () => {
     expect([seedBot(1), seedBot(2)]).toEqual(['novice', 'normal']);
     expect(parseLevelId('c2-11')).toEqual({ chapter: 2, num: 11 });
     expect(parseLevelId('x')).toBeNull();
+  });
+});
+
+describe('applyActions (SIM-10 without a tick)', () => {
+  it('returns a held item while time stands still', () => {
+    const s = sim({ stepTicks: 1 });
+    const a = put(s, 2, 3, 'wood', 1);
+    applyActions(s, [{ type: 'grab', ref: cell(2, 3) }]);
+    const tick = s.tick;
+    const rng = s.rng;
+    applyActions(s, [{ type: 'cancel' }]);
+    expect(itemAt(s, cell(2, 3))?.id).toBe(a.id);
+    expect([s.tick, s.rng, s.stepIndex]).toEqual([tick, rng, 0]);
+    expect(s.events.map((e) => e.type)).toEqual(['returned']);
   });
 });
