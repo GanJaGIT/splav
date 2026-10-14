@@ -182,3 +182,377 @@
   line-height: 20px;
   text-align: center;
 }
+
+/* ---------------------------------------------------------------- Stage 2: level interface */
+
+.hud-heart.broken svg {
+  fill: #5d4037;
+  opacity: 0.55;
+}
+
+.hud-heart .crack {
+  stroke: transparent;
+  stroke-width: 2;
+}
+
+.hud-heart.broken .crack {
+  stroke: #fff3e0;
+}
+
+/* FX-04: the heart cracks. */
+.hud-heart.cracking {
+  animation: heart-crack 0.6s ease-out;
+}
+
+@keyframes heart-crack {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.5) rotate(-12deg);
+  }
+  60% {
+    transform: scale(0.85) rotate(8deg);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.hud-combo {
+  color: #fff59d;
+}
+
+/* FX-02: the combo counter bounces. */
+.hud-combo.bounce {
+  animation: combo-bounce 0.35s ease-out;
+}
+
+@keyframes combo-bounce {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.45) translateY(-4px);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.hud-booster:disabled {
+  cursor: default;
+}
+
+.hud-booster[data-state='locked'] {
+  background: #d7ccb0;
+  color: #5b5446;
+}
+
+.hud-booster[data-state='locked'] svg {
+  fill: #6d6455;
+  stroke: #6d6455;
+}
+
+.hud-booster[data-state='spent'] {
+  opacity: 0.55;
+}
+
+.hud-booster[data-state='video'] .hud-booster-count {
+  background: #c62828;
+}
+
+.hud-booster.armed {
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 3px #a5d6a7;
+}
+
+/* UI-05: windows over the level. */
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(10, 30, 20, 0.55);
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  width: min(340px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 18px 16px 16px;
+  border: 3px solid #1f4d2e;
+  border-radius: 20px;
+  background: #fdf6e3;
+  color: #24321f;
+  text-align: center;
+  animation: modal-in 0.2s ease-out;
+}
+
+@keyframes modal-in {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.modal-text {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.modal-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 8px 14px;
+  border: 2px solid #1f4d2e;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #1f4d2e;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.modal-button.primary {
+  background: #43a047;
+  color: #ffffff;
+}
+
+.modal-button svg {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+/* UI-07: stars pop in one by one. */
+.stars {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.star svg {
+  display: block;
+  width: 56px;
+  height: 56px;
+  fill: #d7ccb0;
+  stroke: #8d6e63;
+  stroke-width: 1.2;
+}
+
+.star.on svg {
+  fill: #ffc107;
+  stroke: #b26a00;
+}
+
+.star.on {
+  animation: star-pop 0.45s ease-out both;
+}
+
+@keyframes star-pop {
+  0% {
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.complete {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.complete-coins {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.complete-coins svg {
+  width: 26px;
+  height: 26px;
+  fill: #ffd54f;
+  stroke: #9a6a00;
+}
+
+/* UI-06 */
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.settings-label {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.settings-hint {
+  font-size: 14px;
+  font-weight: 400;
+  color: #4b5a45;
+}
+
+.switch,
+.lang {
+  min-width: 72px;
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 2px solid #1f4d2e;
+  border-radius: 22px;
+  background: #ffffff;
+  color: #1f4d2e;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.switch.on,
+.lang.on {
+  background: #43a047;
+  color: #ffffff;
+}
+
+.settings-langs {
+  justify-content: center;
+}
+
+.settings-langs .lang {
+  flex: 1 1 0;
+}
+
+.settings-version {
+  font-size: 14px;
+  color: #4b5a45;
+  text-align: center;
+}
+
+/* TUT-01: the hand drags from one item to the other. */
+#ui > .tut-hand,
+#ui > .tut-text {
+  pointer-events: none;
+}
+
+.tut-hand {
+  position: absolute;
+  z-index: 10;
+  width: 48px;
+  height: 48px;
+  margin: -6px 0 0 -14px;
+  animation: tut-drag 2s ease-in-out infinite;
+}
+
+.tut-hand svg {
+  width: 100%;
+  height: 100%;
+  fill: #ffffff;
+  stroke: #1f3a1f;
+  stroke-width: 2;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.35));
+}
+
+@keyframes tut-drag {
+  0%,
+  15% {
+    left: var(--fx);
+    top: var(--fy);
+    transform: scale(1);
+  }
+  25% {
+    left: var(--fx);
+    top: var(--fy);
+    transform: scale(0.85);
+  }
+  70% {
+    left: var(--tx);
+    top: var(--ty);
+    transform: scale(0.85);
+  }
+  80%,
+  100% {
+    left: var(--tx);
+    top: var(--ty);
+    transform: scale(1);
+  }
+}
+
+.tut-text {
+  position: absolute;
+  z-index: 10;
+  left: 50%;
+  width: max-content;
+  max-width: min(320px, calc(100% - 24px));
+  transform: translateX(-50%);
+  padding: 8px 14px;
+  border-radius: 14px;
+  background: rgba(253, 246, 227, 0.95);
+  color: #24321f;
+  font-size: 16px;
+  font-weight: 800;
+  text-align: center;
+}
+
+/* DEV-03 */
+.dev-panel {
+  position: fixed;
+  left: 4px;
+  top: 48px;
+  z-index: 50;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 260px;
+  padding: 4px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  font-size: 14px;
+}
