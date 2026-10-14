@@ -1,0 +1,76 @@
+{
+  "id": "c1-12",
+  "chapter": 1,
+  "lanes": 4,
+  "rows": 7,
+  "stepTicks": 30,
+  "seed": 11201,
+  "waitFirstMerge": false,
+  "spawn": {
+    "perStep": [1, 2],
+    "weights": [
+      {
+        "chain": "wood",
+        "level": 1,
+        "w": 5
+      },
+      {
+        "chain": "garden",
+        "level": 1,
+        "w": 5
+      },
+      {
+        "chain": "wood",
+        "level": 2,
+        "w": 2
+      },
+      {
+        "chain": "garden",
+        "level": 2,
+        "w": 2
+      }
+    ]
+  },
+  "initial": [],
+  "script": [],
+  "piers": [
+    {
+      "col": 0,
+      "row": 2,
+      "resident": "carpenter",
+      "orders": [
+        {
+          "chain": "wood",
+          "level": 4
+        },
+        {
+          "chain": "wood",
+          "level": 5
+        }
+      ]
+    },
+    {
+      "col": 5,
+      "row": 3,
+      "resident": "gardener",
+      "orders": [
+        {
+          "chain": "garden",
+          "level": 4
+        },
+        {
+          "chain": "garden",
+          "level": 5
+        }
+      ]
+    }
+  ],
+  "obstacles": [],
+  "backwater": 5,
+  "lives": 3,
+  "intro": null,
+  "gift": {
+    "booster": "dam",
+    "count": 1
+  }
+}

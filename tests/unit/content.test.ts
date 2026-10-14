@@ -31,8 +31,10 @@ describe('content (§3.12)', () => {
     ]);
   });
 
-  it('VIL-02: six buildings with starting prices', () => {
-    expect(buildingsData.buildings.map((b) => b.price)).toEqual([60, 200, 450, 700, 1000, 1400]);
+  it('VIL-02, VIL-03: six buildings, prices grow along the list (tuned by npm run balance)', () => {
+    const prices = buildingsData.buildings.map((b) => b.price);
+    expect(prices).toHaveLength(6);
+    expect([...prices].sort((a, b) => a - b)).toEqual(prices);
   });
 
   it('rejects broken content', () => {

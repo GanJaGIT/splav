@@ -1,0 +1,101 @@
+{
+  "id": "c2-05",
+  "chapter": 2,
+  "lanes": 5,
+  "rows": 8,
+  "stepTicks": 14,
+  "seed": 20501,
+  "waitFirstMerge": false,
+  "spawn": {
+    "perStep": [1, 1],
+    "weights": [
+      {
+        "chain": "wood",
+        "level": 1,
+        "w": 4
+      },
+      {
+        "chain": "garden",
+        "level": 1,
+        "w": 4
+      },
+      {
+        "chain": "stone",
+        "level": 1,
+        "w": 4
+      },
+      {
+        "chain": "wood",
+        "level": 2,
+        "w": 1
+      },
+      {
+        "chain": "garden",
+        "level": 2,
+        "w": 1
+      },
+      {
+        "chain": "stone",
+        "level": 2,
+        "w": 1
+      }
+    ]
+  },
+  "initial": [],
+  "script": [],
+  "piers": [
+    {
+      "col": 0,
+      "row": 2,
+      "resident": "carpenter",
+      "orders": [
+        {
+          "chain": "wood",
+          "level": 4
+        },
+        {
+          "chain": "stone",
+          "level": 4
+        },
+        {
+          "chain": "garden",
+          "level": 4
+        }
+      ]
+    },
+    {
+      "col": 6,
+      "row": 3,
+      "resident": "miller",
+      "orders": [
+        {
+          "chain": "stone",
+          "level": 4
+        },
+        {
+          "chain": "wood",
+          "level": 5
+        }
+      ]
+    }
+  ],
+  "obstacles": [
+    {
+      "type": "rock",
+      "col": 2,
+      "row": 4
+    },
+    {
+      "type": "rock",
+      "col": 4,
+      "row": 6
+    }
+  ],
+  "backwater": 5,
+  "lives": 3,
+  "intro": "booster-hook",
+  "gift": {
+    "booster": "hook",
+    "count": 2
+  }
+}

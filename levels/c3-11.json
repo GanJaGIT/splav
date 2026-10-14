@@ -1,0 +1,127 @@
+{
+  "id": "c3-11",
+  "chapter": 3,
+  "lanes": 5,
+  "rows": 8,
+  "stepTicks": 20,
+  "seed": 31101,
+  "waitFirstMerge": false,
+  "spawn": {
+    "perStep": [1, 2],
+    "weights": [
+      {
+        "chain": "wood",
+        "level": 1,
+        "w": 3
+      },
+      {
+        "chain": "garden",
+        "level": 1,
+        "w": 3
+      },
+      {
+        "chain": "stone",
+        "level": 1,
+        "w": 3
+      },
+      {
+        "chain": "fish",
+        "level": 1,
+        "w": 3
+      },
+      {
+        "chain": "wood",
+        "level": 2,
+        "w": 1
+      },
+      {
+        "chain": "garden",
+        "level": 2,
+        "w": 1
+      },
+      {
+        "chain": "stone",
+        "level": 2,
+        "w": 1
+      },
+      {
+        "chain": "fish",
+        "level": 2,
+        "w": 1
+      }
+    ]
+  },
+  "initial": [],
+  "script": [],
+  "piers": [
+    {
+      "col": 0,
+      "row": 2,
+      "resident": "miller",
+      "orders": [
+        {
+          "chain": "stone",
+          "level": 5
+        },
+        {
+          "chain": "fish",
+          "level": 4
+        },
+        {
+          "chain": "wood",
+          "level": 5
+        }
+      ]
+    },
+    {
+      "col": 6,
+      "row": 3,
+      "resident": "fisher",
+      "orders": [
+        {
+          "chain": "fish",
+          "level": 5
+        },
+        {
+          "chain": "garden",
+          "level": 4
+        },
+        {
+          "chain": "stone",
+          "level": 4
+        }
+      ]
+    },
+    {
+      "col": 0,
+      "row": 5,
+      "resident": "gardener",
+      "orders": [
+        {
+          "chain": "garden",
+          "level": 5
+        },
+        {
+          "chain": "wood",
+          "level": 4
+        }
+      ]
+    }
+  ],
+  "obstacles": [
+    {
+      "type": "snag",
+      "col": 2,
+      "row": 5
+    },
+    {
+      "type": "snag",
+      "col": 4,
+      "row": 3
+    }
+  ],
+  "backwater": 5,
+  "lives": 3,
+  "intro": null,
+  "gift": null
+}

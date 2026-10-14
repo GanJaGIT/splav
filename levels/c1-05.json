@@ -1,0 +1,57 @@
+{
+  "id": "c1-05",
+  "chapter": 1,
+  "lanes": 3,
+  "rows": 7,
+  "stepTicks": 22,
+  "seed": 10501,
+  "waitFirstMerge": false,
+  "spawn": {
+    "perStep": [1, 1],
+    "weights": [
+      {
+        "chain": "wood",
+        "level": 1,
+        "w": 4
+      },
+      {
+        "chain": "garden",
+        "level": 1,
+        "w": 5
+      },
+      {
+        "chain": "garden",
+        "level": 2,
+        "w": 1
+      }
+    ]
+  },
+  "initial": [],
+  "script": [],
+  "piers": [
+    {
+      "col": 4,
+      "row": 3,
+      "resident": "fisher",
+      "orders": [
+        {
+          "chain": "wood",
+          "level": 4
+        },
+        {
+          "chain": "garden",
+          "level": 4
+        },
+        {
+          "chain": "wood",
+          "level": 4
+        }
+      ]
+    }
+  ],
+  "obstacles": [],
+  "backwater": 5,
+  "lives": 3,
+  "intro": "backwater",
+  "gift": null
+}

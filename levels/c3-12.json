@@ -1,0 +1,92 @@
+{
+  "id": "c3-12",
+  "chapter": 3,
+  "lanes": 5,
+  "rows": 8,
+  "stepTicks": 20,
+  "seed": 31201,
+  "waitFirstMerge": false,
+  "spawn": {
+    "perStep": [1, 2],
+    "weights": [
+      {
+        "chain": "wood",
+        "level": 1,
+        "w": 2
+      },
+      {
+        "chain": "garden",
+        "level": 1,
+        "w": 2
+      },
+      {
+        "chain": "stone",
+        "level": 1,
+        "w": 5
+      },
+      {
+        "chain": "fish",
+        "level": 1,
+        "w": 5
+      },
+      {
+        "chain": "stone",
+        "level": 2,
+        "w": 2
+      },
+      {
+        "chain": "fish",
+        "level": 2,
+        "w": 2
+      }
+    ]
+  },
+  "initial": [],
+  "script": [],
+  "piers": [
+    {
+      "col": 0,
+      "row": 2,
+      "resident": "miller",
+      "orders": [
+        {
+          "chain": "stone",
+          "level": 5
+        },
+        {
+          "chain": "stone",
+          "level": 6
+        }
+      ]
+    },
+    {
+      "col": 6,
+      "row": 3,
+      "resident": "fisher",
+      "orders": [
+        {
+          "chain": "fish",
+          "level": 5
+        },
+        {
+          "chain": "fish",
+          "level": 6
+        }
+      ]
+    }
+  ],
+  "obstacles": [
+    {
+      "type": "snag",
+      "col": 3,
+      "row": 4
+    }
+  ],
+  "backwater": 5,
+  "lives": 3,
+  "intro": null,
+  "gift": {
+    "booster": "net",
+    "count": 1
+  }
+}
