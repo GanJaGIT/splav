@@ -1,0 +1,23 @@
+{
+  "chapter": 2,
+  "lanes": 5,
+  "rows": 8,
+  "stepTicks": 18,
+  "perStep": [1, 2],
+  "weights": [
+    { "chain": "wood", "level": 1, "w": 4 },
+    { "chain": "garden", "level": 1, "w": 4 },
+    { "chain": "stone", "level": 1, "w": 4 },
+    { "chain": "wood", "level": 2, "w": 1 },
+    { "chain": "garden", "level": 2, "w": 1 },
+    { "chain": "stone", "level": 2, "w": 1 }
+  ],
+  "piers": 2,
+  "ordersPerPier": 3,
+  "orderChains": ["wood", "garden", "stone"],
+  "orderLevels": [3, 5],
+  "rocks": [0, 3],
+  "residents": ["fisher", "carpenter", "miller", "gardener", "stoker", "builder"],
+  "backwater": 5,
+  "lives": 3
+}
