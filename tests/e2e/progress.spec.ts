@@ -68,7 +68,7 @@ test('VIL-02: chapter 2 opens with the mill', async ({ page }) => {
   await presetSave(page, { levels, coins: 2000 });
   await openGame(page, '?lang=en');
   await expect(page.locator('[data-ui="village-message"]')).toHaveText(
-    'Restore the mill to open chapter 2',
+    'Restore the mill to unlock Chapter 2',
   );
   await expect(page.locator('[data-ui="village-play"]')).toBeDisabled();
   await page.locator('[data-ui="building-mill"]').click();
