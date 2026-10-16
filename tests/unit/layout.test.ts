@@ -78,4 +78,18 @@ describe('layout', () => {
       expect(s.x + s.w).toBeLessThanOrEqual(l.backwater.x + l.backwater.w);
     }
   });
+
+  it('GD-52, VIL-02: 9 slots (Shed + Continue) stay on screen on every size', () => {
+    const g: FieldGeometry = { ...BIG, backwater: 9 };
+    for (const [w, h] of SIZES) {
+      const a = fitActiveArea(w, h, w > 412);
+      const l = computeLayout(a.width, a.height, g);
+      expect(inside(l.backwater, a.width, a.height), `${w}x${h}`).toBe(true);
+      const last = slotRect(l, 8);
+      expect(last.x + last.w, `${w}x${h}`).toBeLessThanOrEqual(l.backwater.x + l.backwater.w);
+      expect(l.slot, `${w}x${h}`).toBeGreaterThanOrEqual(w <= 412 ? 34 : 44);
+    }
+    // 6 slots (the Shed) keep the full 44 px on the narrowest phone.
+    expect(computeLayout(360, 560, { ...BIG, backwater: 6 }).slot).toBe(44);
+  });
 });

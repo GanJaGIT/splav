@@ -215,12 +215,13 @@ export class FieldScene extends Phaser.Scene {
   refAt(x: number, y: number, exceptId?: number): Ref | null {
     const s = this.session?.state;
     if (!s) return null;
+    const l = this.layout;
     for (const v of this.items.values()) {
       if (v.id === exceptId) continue;
-      if (Math.hypot(v.x - x, v.y - y) <= this.layout.cell * 0.45) {
-        const ref = refOfItem(s, v.id);
-        if (ref) return ref;
-      }
+      const ref = refOfItem(s, v.id);
+      // Backwater slots may be narrower than a cell (9 slots on a phone): stay inside the slot.
+      const r = ref?.at === 'backwater' ? Math.min(l.cell, l.slot + l.slotGap) / 2 : l.cell * 0.45;
+      if (ref && Math.hypot(v.x - x, v.y - y) <= r) return ref;
     }
     return this.cellRefAt(x, y);
   }

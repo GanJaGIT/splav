@@ -25,6 +25,7 @@ export interface Layout {
   cell: number;
   backwater: Rect;
   slot: number;
+  slotGap: number;
   boosters: Rect;
 }
 
@@ -39,6 +40,7 @@ export const MAX_CELL = 96;
 /** UI-10: touch targets are at least 44 px. */
 const SLOT = 44;
 const SLOT_GAP = 6;
+const MIN_SLOT_GAP = 3;
 const TRAY_PAD = 6;
 
 /**
@@ -85,8 +87,15 @@ export function computeLayout(width: number, height: number, g: FieldGeometry): 
   const fy = top + Math.max(0, Math.floor((bottom - top - groupH) / 2));
   const field: Rect = { x: fx, y: fy, w: fw, h: fh };
 
-  const slot = SLOT;
-  const trayW = g.backwater * slot + (g.backwater - 1) * SLOT_GAP + 2 * TRAY_PAD;
+  // GD-52 with the Shed: up to 9 slots. When they do not fit the width, the gaps and then the
+  // slots get smaller (only after Continue on a narrow phone).
+  const n = Math.max(1, g.backwater);
+  const fits = (sl: number, gap: number): boolean => n * sl + (n - 1) * gap + 2 * TRAY_PAD <= areaW;
+  const slotGap = fits(SLOT, SLOT_GAP) ? SLOT_GAP : MIN_SLOT_GAP;
+  const slot = fits(SLOT, slotGap)
+    ? SLOT
+    : Math.max(1, Math.floor((areaW - 2 * TRAY_PAD - (n - 1) * slotGap) / n));
+  const trayW = n * slot + (n - 1) * slotGap + 2 * TRAY_PAD;
   const backwater: Rect = {
     x: clamp(fx + Math.floor((fw - trayW) / 2), GAP, right - GAP - trayW),
     y: fy + fh + GAP,
@@ -103,6 +112,7 @@ export function computeLayout(width: number, height: number, g: FieldGeometry): 
     cell,
     backwater,
     slot,
+    slotGap,
     boosters,
   };
 }
@@ -110,5 +120,5 @@ export function computeLayout(width: number, height: number, g: FieldGeometry): 
 /** Top-left of backwater slot `i` inside the tray. */
 export function slotRect(l: Layout, i: number): Rect {
   const y = l.backwater.y + Math.floor((l.backwater.h - l.slot) / 2);
-  return { x: l.backwater.x + TRAY_PAD + i * (l.slot + SLOT_GAP), y, w: l.slot, h: l.slot };
+  return { x: l.backwater.x + TRAY_PAD + i * (l.slot + l.slotGap), y, w: l.slot, h: l.slot };
 }
