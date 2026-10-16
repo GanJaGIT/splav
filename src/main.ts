@@ -100,6 +100,7 @@ async function main(): Promise<void> {
     ready = true;
     loading.done();
     platform.gameReady();
+    gameplay.setReady();
     syncLoop();
   });
   const app = new App({

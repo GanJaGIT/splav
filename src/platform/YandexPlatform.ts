@@ -64,7 +64,7 @@ interface Ysdk {
     LoadingAPI?: { ready(): void };
     GameplayAPI?: { start(): void; stop(): void };
   };
-  EVENTS: { ACCOUNT_SELECTION_DIALOG_OPENED: string; ACCOUNT_SELECTION_DIALOG_CLOSED: string };
+  EVENTS?: { ACCOUNT_SELECTION_DIALOG_OPENED?: string; ACCOUNT_SELECTION_DIALOG_CLOSED?: string };
   on(event: string, cb: () => void): void;
   serverTime(): number;
   getPlayer(): Promise<YPlayer>;
@@ -133,15 +133,20 @@ export class YandexPlatform implements Platform {
         for (const cb of this.resumeCbs) cb();
       });
       // YG-09: after a login the platform asks which progress to keep; then it is read again.
-      ysdk.on(ysdk.EVENTS.ACCOUNT_SELECTION_DIALOG_OPENED, () => {
-        this.syncPaused = true;
-      });
-      ysdk.on(ysdk.EVENTS.ACCOUNT_SELECTION_DIALOG_CLOSED, () => {
-        void this.reloadPlayer().then(() => {
-          this.syncPaused = false;
-          for (const cb of this.accountCbs) cb();
+      // (The SDK mock of sdk-dev-proxy has no such events.)
+      const opened = ysdk.EVENTS?.ACCOUNT_SELECTION_DIALOG_OPENED;
+      const closed = ysdk.EVENTS?.ACCOUNT_SELECTION_DIALOG_CLOSED;
+      if (opened && closed) {
+        ysdk.on(opened, () => {
+          this.syncPaused = true;
         });
-      });
+        ysdk.on(closed, () => {
+          void this.reloadPlayer().then(() => {
+            this.syncPaused = false;
+            for (const cb of this.accountCbs) cb();
+          });
+        });
+      }
       await this.reloadPlayer();
       if (this.iap) this.payments = await ysdk.getPayments().catch(() => null);
     } catch {

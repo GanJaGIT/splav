@@ -20,6 +20,7 @@ describe('GameplayState (YG-03)', () => {
   it('starts in a level without windows, stops for windows and suspension, never twice in a row', async () => {
     const { platform, calls } = fakePlatform();
     const g = new GameplayState(platform);
+    g.setReady();
     g.setInLevel(true);
     await flush();
     expect(calls).toEqual(['start']);
@@ -40,6 +41,7 @@ describe('GameplayState (YG-03)', () => {
   it('closing one window and opening another in one go sends nothing (п. 1.19.3)', async () => {
     const { platform, calls } = fakePlatform();
     const g = new GameplayState(platform);
+    g.setReady();
     g.setInLevel(true);
     g.windowOpened();
     await flush();
@@ -50,6 +52,19 @@ describe('GameplayState (YG-03)', () => {
     expect(calls).toEqual([]);
   });
 
+  it('YG-02: nothing goes before LoadingAPI.ready(); then the state is sent', async () => {
+    const { platform, calls } = fakePlatform();
+    const g = new GameplayState(platform);
+    g.setInLevel(true);
+    g.windowOpened();
+    g.windowClosed();
+    await flush();
+    expect(calls).toEqual([]);
+    g.setReady();
+    await flush();
+    expect(calls).toEqual(['start']);
+  });
+
   it('survives platform errors (§5.1)', async () => {
     const g = new GameplayState({
       gameplayStart: () => {
@@ -57,6 +72,7 @@ describe('GameplayState (YG-03)', () => {
       },
       gameplayStop: () => undefined,
     } as unknown as Platform);
+    g.setReady();
     g.setInLevel(true);
     await flush();
     expect(g.isPlaying()).toBe(true);

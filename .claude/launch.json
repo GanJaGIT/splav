@@ -9,6 +9,19 @@
       ],
       "port": 5181,
       "autoPort": true
+    },
+    {
+      "name": "splav-yg",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "@yandex-games/sdk-dev-proxy",
+        "-p",
+        "dist",
+        "--dev-mode=true",
+        "--port",
+        "8080"
+      ],
+      "port": 8080
     }
   ]
 }

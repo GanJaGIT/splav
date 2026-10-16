@@ -3,6 +3,7 @@
  * a level is on screen, no window covers it and the game is not suspended.
  * stop() goes at once; start() at the end of the current task and only if the game still plays
  * then, so closing a window and opening another in one click sends nothing (requirement 1.19.3).
+ * Nothing goes before LoadingAPI.ready(): the gameplay markup starts once the game is ready.
  */
 
 import type { Platform } from '../platform/Platform';
@@ -13,8 +14,15 @@ export class GameplayState {
   private suspended = false;
   private playing = false;
   private startPending = false;
+  private ready = false;
 
   constructor(private readonly platform: Platform) {}
+
+  /** YG-02: LoadingAPI.ready() was sent; from now on start() and stop() go to the platform. */
+  setReady(): void {
+    this.ready = true;
+    this.sync();
+  }
 
   setInLevel(on: boolean): void {
     this.inLevel = on;
@@ -47,7 +55,7 @@ export class GameplayState {
    * level stays on its Pause window until "Continue": stop() is sent again so the platform knows.
    */
   reassert(): void {
-    if (this.playing) return;
+    if (this.playing || !this.ready) return;
     try {
       this.platform.gameplayStop();
     } catch {
@@ -60,6 +68,7 @@ export class GameplayState {
   }
 
   private sync(): void {
+    if (!this.ready) return;
     if (!this.wanted()) {
       this.send(false);
       return;

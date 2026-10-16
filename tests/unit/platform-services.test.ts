@@ -285,6 +285,9 @@ describe('YG-09, YG-04: account change and the platform resume', () => {
     const f = fake();
     const g = new GameplayState(f.platform);
     g.reassert();
+    expect(f.calls).toEqual([]);
+    g.setReady();
+    g.reassert();
     expect(f.calls).toEqual(['stop']);
   });
 });
