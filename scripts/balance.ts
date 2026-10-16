@@ -26,8 +26,10 @@ import { levelIds, loadLevel } from './lib/levels';
 /** VIL-03: the player passes every level once, with 2 stars. */
 const STARS = 2;
 const FIRST_WIN_BONUS = FIRST_WIN_BASE + FIRST_WIN_PER_STAR * STARS;
-/** The building that opens each next chapter (VIL-02). */
-const GATES: Record<number, string> = { 1: 'mill', 2: 'bridge' };
+/** The building that opens each next chapter (VIL-02), from buildings.json. */
+const GATES: Record<number, string> = Object.fromEntries(
+  buildings.flatMap((b) => (b.effect.type === 'chapter' ? [[b.effect.value - 1, b.id]] : [])),
+);
 
 interface Row {
   level: LevelData;

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { boosters, buildings } from '../../src/content';
+import ru from '../../src/i18n/ru.json';
 import type { SaveData } from '../../src/services/SaveData';
 import { dayIndex } from '../../src/services/day';
 import { ProgressService } from '../../src/services/progress';
@@ -210,6 +211,15 @@ describe('ProgressService', () => {
     expect(p.levelOpen('c2-01')).toBe(true);
     expect(p.chapterOpen(3)).toBe(false);
     expect(p.levelOpen('nope')).toBe(false);
+    // The gates come from the buildings' "chapter" effects in buildings.json.
+    expect([1, 2, 3].map((n) => p.gateOf(n))).toEqual([null, 'mill', 'bridge']);
+  });
+
+  it('VIL-02: every chapter gate has its village message', () => {
+    const chapterBuildings = buildings.filter((b) => b.effect.type === 'chapter');
+    expect(chapterBuildings.length).toBeGreaterThan(0);
+    const texts: Record<string, string> = ru;
+    for (const b of chapterBuildings) expect(texts[`village.need.${b.id}`], b.id).toBeTruthy();
   });
 
   it('pays coins, keeps the best stars and counts them (GD-05, GD-63)', async () => {
@@ -241,6 +251,12 @@ describe('ProgressService', () => {
     const before = p.data.coins;
     expect(p.win('c1-01', 3, 100).coins).toBe(110);
     expect(p.data.coins).toBe(before + 110);
+    // GD-52, GD-63: a loss, Continue, a second loss, then a win pay round(full × 1.1) in total.
+    const paid1 = p.loss(5); // round(5.5) = 6
+    const paid2 = p.loss(9, paid1); // round(9.9) = 10 in total
+    const win = p.win('c1-01', 1, 105, paid1 + paid2); // round(115.5) = 116 in total
+    expect([paid1, paid1 + paid2, paid1 + paid2 + win.coins]).toEqual([6, 10, 116]);
+    expect(p.loss(3, 10)).toBe(0);
   });
 
   it('gives booster gifts once: on the first start of an intro level, for stars on a final (GD-80)', async () => {
@@ -263,9 +279,25 @@ describe('ProgressService', () => {
     p.data.coins = 100_000;
     p.restore('flowerbed');
     expect(p.dailyGiftReady(100)).toBe(true);
+    expect(p.dailyGiftChoice(0.5)).toBe('dam');
     expect(p.takeDailyGift(100, () => 0.5)).toBe('dam');
     expect(p.takeDailyGift(100, () => 0.5)).toBeNull();
     expect(p.dailyGiftReady(101)).toBe(true);
+    // Nothing is open in this test's level order, so the garden falls back to a dam.
+    expect([0, 0.5, 0.99].map((r) => p.dailyGiftChoice(r))).toEqual(['dam', 'dam', 'dam']);
+    // Only open boosters come: here the hook opens at c1-02, the others at c1-01.
+    const s2 = new SaveService(cloud().platform, new Memory(), () => 1);
+    await s2.load();
+    const q = new ProgressService(s2, {
+      order,
+      levels,
+      buildings,
+      boosters: boosters.map((b) => ({ ...b, unlockLevel: b.id === 'hook' ? 'c1-02' : 'c1-01' })),
+    });
+    q.win('c1-01', 2, 0);
+    expect(new Set([0, 0.34, 0.67, 0.99].map((r) => q.dailyGiftChoice(r)))).toEqual(
+      new Set(['dam', 'joker', 'net']),
+    );
   });
 
   it('remembers found items, seen cards and settings', async () => {

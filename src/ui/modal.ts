@@ -8,6 +8,7 @@ export interface ModalButton {
   primary?: boolean;
   /** YG-11: the button shows a video ad; the icon makes that clear. */
   video?: boolean;
+  disabled?: boolean;
   onClick(): void;
 }
 
@@ -61,6 +62,7 @@ export class Modals {
       );
       btn.type = 'button';
       btn.dataset.ui = b.ui;
+      btn.disabled = b.disabled === true;
       const label = el('span', 'modal-button-label');
       label.textContent = b.label;
       btn.appendChild(label);

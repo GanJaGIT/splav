@@ -551,3 +551,26 @@ export function ensureTextures(scene: Phaser.Scene, residents: readonly string[]
   add('dot', dotCanvas);
   for (const id of residents) add(RESIDENT_KEY(id), () => residentCanvas(id));
 }
+
+const urls = new Map<string, string>();
+const cached = (key: string, make: () => HTMLCanvasElement): string => {
+  let url = urls.get(key);
+  if (!url) {
+    url = make().toDataURL('image/png');
+    urls.set(key, url);
+  }
+  return url;
+};
+
+/** The same pictures for the DOM interface (encyclopedia, windows, cards). */
+export function itemImage(chain: Chain, level: number): string {
+  return cached(itemKey(chain, level), () => itemCanvas(chain, level));
+}
+
+export function residentImage(id: string): string {
+  return cached(RESIDENT_KEY(id), () => residentCanvas(id));
+}
+
+export function obstacleImage(kind: 'rock' | 'snag' | 'pier'): string {
+  return cached(kind, kind === 'rock' ? rockCanvas : kind === 'snag' ? snagCanvas : pierCanvas);
+}

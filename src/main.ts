@@ -1,5 +1,5 @@
 import { App } from './app';
-import { residents } from './content';
+import { boosters, buildings, residents } from './content';
 import { levelOrder, levels } from './content/levels';
 import { createGame, resizeGame } from './game/createGame';
 import { dictionaries, supportedLangs } from './i18n';
@@ -8,6 +8,8 @@ import { AudioService } from './services/audio';
 import { GameplayState } from './services/gameplay-state';
 import { I18n, resolveLang } from './services/I18n';
 import { Lifecycle } from './services/lifecycle';
+import { ProgressService } from './services/progress';
+import { SaveService } from './services/save';
 import { LoadingScreen } from './ui/loading';
 import { installInputGuards, Stage } from './ui/stage';
 import './ui/styles.css';
@@ -18,15 +20,31 @@ function byId(id: string): HTMLElement {
   return node;
 }
 
+function storage(): Storage | null {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
 async function main(): Promise<void> {
   installInputGuards();
   const loading = new LoadingScreen();
 
   const platform = createPlatform();
   await platform.init();
-  loading.progress(0.4);
+  loading.progress(0.3);
 
-  const i18n = new I18n(dictionaries, resolveLang(platform.lang(), supportedLangs));
+  // YG-07: the fresher of the local and the cloud copy.
+  const save = new SaveService(platform, storage());
+  await save.load();
+  const progress = new ProgressService(save, { order: levelOrder, levels, buildings, boosters });
+  loading.progress(0.5);
+
+  // YG-06: the language the player chose wins over the platform's.
+  const lang = resolveLang(save.data.settings.lang ?? platform.lang(), supportedLangs);
+  const i18n = new I18n(dictionaries, lang);
   document.documentElement.lang = i18n.lang;
   document.title = i18n.t('game.title');
 
@@ -39,19 +57,39 @@ async function main(): Promise<void> {
   const stageEl = byId('stage');
   const stage = new Stage(byId('viewport'), stageEl, platform.isDesktop());
 
+  // PERF-03: in the village the field is hidden and Phaser sleeps (no frames, no battery);
+  // it wakes when a level shows the field. Only after the first frame (YG-02 waits for it).
+  const fieldHost = byId('canvas-host');
+  const syncLoop = (): void => {
+    if (!ready) return;
+    if (fieldHost.hidden) {
+      game.loop.sleep();
+    } else if (!game.loop.running) {
+      // No catch-up for the time asleep: the river starts from where it stands.
+      game.loop.resetDelta();
+      game.loop.wake();
+    }
+  };
+  new MutationObserver(syncLoop).observe(fieldHost, {
+    attributes: true,
+    attributeFilter: ['hidden'],
+  });
+
   // YG-02: LoadingAPI.ready() exactly once, when the first interactive screen is drawn.
   let ready = false;
-  const { game, scene } = createGame(byId('canvas-host'), residents, () => {
+  const { game, scene } = createGame(fieldHost, residents, () => {
     if (ready) return;
     ready = true;
     loading.done();
     platform.gameReady();
+    syncLoop();
   });
   const app = new App({
     platform,
     audio,
     gameplay,
     scene,
+    progress,
     i18n,
     ui: byId('ui'),
     field: byId('canvas-host'),
@@ -59,6 +97,11 @@ async function main(): Promise<void> {
   const lifecycle = new Lifecycle(audio, gameplay, () => app.interrupt());
   lifecycle.attach(platform);
   app.lifecycle = lifecycle;
+  // YG-08: what the cloud has not got yet goes when the tab is hidden.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') save.flush();
+  });
+  window.addEventListener('pagehide', () => save.flush());
 
   stage.onResize((w, h) => {
     resizeGame(game, scene, w, h);
@@ -67,9 +110,8 @@ async function main(): Promise<void> {
   stage.fit();
   loading.progress(0.7);
 
-  // UI-02: the first launch goes straight to level 1 (the village arrives in Stage 3).
   const asked = __DEV_HOOKS__ ? new URLSearchParams(window.location.search).get('level') : null;
-  app.startLevel(asked && levels[asked] ? asked : (levelOrder[0] ?? 'c1-01'));
+  app.boot(asked);
 
   if (__DEV_HOOKS__) {
     const { installDevHooks } = await import('./dev');
@@ -80,6 +122,7 @@ async function main(): Promise<void> {
       scene,
       audio,
       gameplay,
+      progress,
       stage: stageEl,
       isReady: () => ready,
     });

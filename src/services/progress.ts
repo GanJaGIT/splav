@@ -29,9 +29,6 @@ export interface WinResult {
   gift: { booster: BoosterId; count: number } | null;
 }
 
-/** The building that opens each chapter (VIL-02). */
-const CHAPTER_GATES: Record<number, string> = { 2: 'mill', 3: 'bridge' };
-
 export const itemKey = (chain: Chain, level: number): string => `${chain}.${level}`;
 
 export class ProgressService {
@@ -64,8 +61,12 @@ export class ProgressService {
     return Object.keys(this.data.levels).length === 0;
   }
 
+  /** The building whose effect opens the chapter (buildings.json, VIL-02). */
   gateOf(chapter: number): string | null {
-    return CHAPTER_GATES[chapter] ?? null;
+    const b = this.c.buildings.find(
+      (x) => x.effect.type === 'chapter' && x.effect.value === chapter,
+    );
+    return b?.id ?? null;
   }
 
   chapterOpen(chapter: number): boolean {
@@ -91,9 +92,10 @@ export class ProgressService {
   }
 
   /** GD-63, VIL-02 (bathhouse): a win pays the level's coins; stars keep their best. */
-  win(id: string, stars: number, coins: number): WinResult {
+  /** `alreadyPaid`: coins this attempt got for a loss before Continue (GD-52), after the bathhouse. */
+  win(id: string, stars: number, coins: number, alreadyPaid = 0): WinResult {
     const firstWin = !this.completed(id);
-    const paid = Math.round(coins * this.coinFactor());
+    const paid = Math.max(0, Math.round(coins * this.coinFactor()) - alreadyPaid);
     this.data.coins += paid;
     this.data.levels[id] = { stars: Math.max(stars, this.stars(id)) };
     // GD-80: chapter finals give boosters for stars on the first win.
@@ -107,9 +109,12 @@ export class ProgressService {
     return { coins: paid, firstWin, gift };
   }
 
-  /** GD-63: a lost attempt pays half of the level's coins (already halved by the simulation). */
-  loss(coins: number): number {
-    const paid = Math.round(coins * this.coinFactor());
+  /**
+   * GD-63: a lost attempt pays half of the level's coins (already halved by the simulation),
+   * minus what this attempt already got for an earlier loss.
+   */
+  loss(coins: number, alreadyPaid = 0): number {
+    const paid = Math.max(0, Math.round(coins * this.coinFactor()) - alreadyPaid);
     if (paid > 0) {
       this.data.coins += paid;
       this.save.commit();
@@ -204,11 +209,16 @@ export class ProgressService {
     );
   }
 
-  takeDailyGift(day: number, random: () => number): BoosterId | null {
-    if (!this.dailyGiftReady(day)) return null;
+  /** The booster the flower garden gives for a random number 0…1: one of the open ones. */
+  dailyGiftChoice(r: number): BoosterId {
     const open = BOOSTER_IDS.filter((id) => this.boosterUnlocked(id, null));
     const pool = open.length > 0 ? open : (['dam'] as BoosterId[]);
-    const id = pool[Math.min(pool.length - 1, Math.floor(random() * pool.length))] as BoosterId;
+    return pool[Math.min(pool.length - 1, Math.floor(r * pool.length))] as BoosterId;
+  }
+
+  takeDailyGift(day: number, random: () => number): BoosterId | null {
+    if (!this.dailyGiftReady(day)) return null;
+    const id = this.dailyGiftChoice(random());
     this.data.boosters[id] += 1;
     this.data.lastGiftDay = day;
     this.save.commit();

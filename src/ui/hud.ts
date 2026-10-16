@@ -15,7 +15,7 @@ export const ICONS = {
   star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5-4.9-4.5 6.6-.8z"/></svg>',
 } as const;
 
-const BOOSTER_ICONS: Record<BoosterId, string> = {
+export const BOOSTER_ICONS: Record<BoosterId, string> = {
   dam: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="15" width="18" height="4" rx="1"/></svg>',
   hook: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2v11a5 5 0 1 1-10 0" fill="none" stroke-width="3" stroke-linecap="round"/><path d="M14 2l6 4" fill="none" stroke-width="3" stroke-linecap="round"/></svg>',
   joker:
@@ -34,7 +34,7 @@ export interface BoosterView {
 
 export function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
-  className: string,
+  className = '',
   html = '',
 ): HTMLElementTagNameMap[K] {
   const node = document.createElement(tag);
@@ -137,7 +137,9 @@ export class Hud {
     Array.from(this.lives.children).forEach((h, i) => {
       const broken = i >= lives - lost;
       h.classList.toggle('broken', broken);
-      if (broken && i < lives - this.shownLost) h.classList.add('cracking');
+      // FX-04: a heart cracks when it breaks; a whole one is ready to crack again.
+      if (!broken) h.classList.remove('cracking');
+      else if (i < lives - this.shownLost) h.classList.add('cracking');
     });
     this.shownLost = lost;
   }

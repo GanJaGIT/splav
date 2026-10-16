@@ -11,6 +11,8 @@ import type { LocalPlatform } from './platform/LocalPlatform';
 import type { Platform } from './platform/Platform';
 import type { AudioService, Sfx } from './services/audio';
 import type { GameplayState } from './services/gameplay-state';
+import type { ProgressService } from './services/progress';
+import type { SaveData } from './services/SaveData';
 import {
   cloneState,
   decide,
@@ -31,6 +33,7 @@ export interface UiRect {
 }
 
 export interface DevState {
+  screen: 'village' | 'level';
   level: string | null;
   status: string | null;
   tick: number;
@@ -71,6 +74,15 @@ export interface DevHooks {
   debugUI(): UiRect[];
   played(): Sfx[];
   calls(): string[];
+  /** The saved progress (a copy). */
+  save(): SaveData;
+  /** Adds coins and saves. */
+  grant(coins: number): void;
+  /** PERF-03: Phaser draws frames (false in the village, where the field is hidden). */
+  rendering(): boolean;
+  /** Marks a level as passed with these stars and saves. */
+  win(id: string, stars: number): void;
+  village(): void;
 }
 
 declare global {
@@ -86,6 +98,7 @@ export interface DevDeps {
   scene: FieldScene;
   audio: AudioService;
   gameplay: GameplayState;
+  progress: ProgressService;
   stage: HTMLElement;
   isReady(): boolean;
 }
@@ -100,10 +113,12 @@ export function installDevHooks(d: DevDeps): void {
     platform: d.platform,
     game: d.game,
     isReady: d.isReady,
+    rendering: () => d.game.loop.running,
     state: () => {
       const s = app.session?.state;
       const l = scene.getLayout();
       return {
+        screen: app.village.visible() ? 'village' : 'level',
         level: app.levelId,
         status: s?.status ?? null,
         tick: s?.tick ?? 0,
@@ -157,6 +172,17 @@ export function installDevHooks(d: DevDeps): void {
       }),
     played: () => [...d.audio.played],
     calls: () => [...((d.platform as Partial<LocalPlatform>).calls ?? [])],
+    save: () => JSON.parse(JSON.stringify(d.progress.data)) as SaveData,
+    grant: (coins) => {
+      d.progress.data.coins += coins;
+      d.progress.setSettings({});
+      app.renderVillage();
+    },
+    win: (id, stars) => {
+      d.progress.win(id, stars, 0);
+      app.renderVillage();
+    },
+    village: () => app.showVillage(),
   };
   if (new URLSearchParams(window.location.search).get('dev') === '1') mountPanel(app);
 }
@@ -181,6 +207,11 @@ function mountPanel(app: App): void {
     b.addEventListener('click', () => app.startBot(kind));
     panel.appendChild(b);
   }
+  const coins = document.createElement('button');
+  coins.type = 'button';
+  coins.textContent = '+1000';
+  coins.addEventListener('click', () => window.__game?.grant(1000));
+  panel.appendChild(coins);
   const tempo = document.createElement('span');
   panel.appendChild(tempo);
   window.setInterval(() => {

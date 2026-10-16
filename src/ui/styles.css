@@ -168,10 +168,11 @@
   white-space: nowrap;
 }
 
+/* Inside the button's corner, so nothing sticks out of it (ACC-03). */
 .hud-booster-count {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: 1px;
+  right: 1px;
   min-width: 20px;
   height: 20px;
   padding: 0 4px;
@@ -555,4 +556,497 @@
   background: rgba(0, 0, 0, 0.6);
   color: #ffffff;
   font-size: 14px;
+}
+
+/* ---------------------------------------------------------------- Stage 3: village */
+
+/* VIL-01, UI-03 */
+.village {
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(#bfe6a4, #8fcf6f);
+}
+
+.village-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  min-height: 52px;
+  padding: 4px 6px;
+  background: rgba(23, 63, 40, 0.75);
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: 17px;
+  background: rgba(0, 0, 0, 0.25);
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.pill svg {
+  width: 22px;
+  height: 22px;
+  fill: #ffd54f;
+  stroke: #9a6a00;
+}
+
+.village-button svg {
+  fill: #ffffff;
+}
+
+.village-chapters {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px 0;
+}
+
+.village-chapter-title {
+  color: #1f3a1f;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.village-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.village-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 44px;
+  height: 44px;
+  border: 2px solid #1f4d2e;
+  border-radius: 12px;
+  background: #fdf6e3;
+  color: #1f4d2e;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.village-tab.on {
+  background: #43a047;
+  color: #ffffff;
+}
+
+.village-tab.locked {
+  background: #d7ccb0;
+  color: #5b5446;
+}
+
+.village-tab svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.village-map-wrap {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 4px;
+}
+
+.village-map {
+  position: relative;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border: 3px solid #2b5a33;
+  border-radius: 18px;
+}
+
+.village-map > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.level-node {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: calc(46px * var(--s, 1));
+  height: calc(46px * var(--s, 1));
+  padding: 0;
+  transform: translate(-50%, -50%);
+  border: 3px solid #1f4d2e;
+  border-radius: 50%;
+  background: #fdf6e3;
+  color: #1f4d2e;
+  font: inherit;
+  cursor: pointer;
+}
+
+.level-node .level-num {
+  font-size: max(14px, calc(17px * var(--s, 1)));
+  font-weight: 800;
+  line-height: 1;
+}
+
+.level-stars {
+  position: absolute;
+  transform: translate(-50%, calc(25px * var(--s, 1)));
+  pointer-events: none;
+  color: #ffc107;
+  font-size: max(14px, calc(14px * var(--s, 1)));
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 #5a3a1e;
+}
+
+.level-node.next {
+  background: #ffd54f;
+}
+
+/* The next level glows: a ring under its circle (outside the button, so nothing sticks out of
+   it). Only transform and opacity change: the browser moves a ready layer instead of repainting
+   the map every frame (cheap on weak phones). Paused under a window. */
+.level-glow {
+  position: absolute;
+  width: calc(66px * var(--s, 1));
+  height: calc(66px * var(--s, 1));
+  border-radius: 50%;
+  /* A ring around the circle; its middle stays clear over the border. */
+  background: radial-gradient(
+    circle closest-side,
+    transparent 68%,
+    rgba(255, 213, 79, 0.65) 72%,
+    rgba(255, 213, 79, 0.25) 100%
+  );
+  opacity: 0;
+  animation: node-pulse 1.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+#ui:has(.modal-backdrop) .level-glow {
+  animation-play-state: paused;
+}
+
+.level-node.locked {
+  background: #c9c2b2;
+  color: #5b5446;
+  border-color: #6d6455;
+  cursor: default;
+}
+
+@keyframes node-pulse {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* The picture on top, the price under it, both inside the button. */
+.building {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.building > svg {
+  flex: 1 1 0;
+  width: 100%;
+  min-height: 0;
+  overflow: visible;
+}
+
+/* VIL-04: a short animation when restored. */
+.building.just-restored {
+  animation: building-pop 0.7s ease-out;
+}
+
+@keyframes building-pop {
+  0% {
+    transform: scale(0.6);
+    filter: brightness(1.6);
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    filter: none;
+  }
+}
+
+.building-price {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  font-size: max(14px, calc(14px * var(--s, 1)));
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.building-price.ready {
+  background: #2e7d32;
+}
+
+.building-price svg {
+  width: max(14px, calc(14px * var(--s, 1)));
+  height: max(14px, calc(14px * var(--s, 1)));
+  fill: #ffd54f;
+}
+
+.village-bottom {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px 10px;
+}
+
+.village-message {
+  color: #1f3a1f;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.village-play {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(320px, 100%);
+  min-height: 56px;
+  padding: 6px 16px;
+  border: 3px solid #1f4d2e;
+  border-radius: 18px;
+  background: #43a047;
+  color: #ffffff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.village-play:disabled {
+  background: #9e9e9e;
+  cursor: default;
+}
+
+.village-play-label {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.village-play-sub {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* VIL-02: the building window. */
+.building-window {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.building-picture svg {
+  width: 120px;
+  height: 100px;
+}
+
+.resident {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+
+.resident-face {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+}
+
+.resident-name {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.resident-line {
+  font-size: 15px;
+  font-style: italic;
+}
+
+.building-need {
+  color: #8d3a2e;
+}
+
+/* GD-23 */
+.encyclopedia {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.enc-label {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.enc-cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.enc-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 2px solid #c9bfa3;
+  border-radius: 10px;
+  background: #efe6cc;
+  color: #8d8370;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.enc-cell.known {
+  border-color: #1f4d2e;
+  background: #ffffff;
+}
+
+.enc-cell img {
+  width: 40px;
+  height: 40px;
+}
+
+.encyclopedia-detail {
+  min-height: 2.7em;
+  text-align: center;
+}
+
+/* TUT-02 */
+.intro-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.intro-image {
+  width: 64px;
+  height: 64px;
+}
+
+/* TUT-02: a booster or a heart on a "New" card. */
+.intro-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border: 3px solid #1f4d2e;
+  border-radius: 16px;
+  background: #fdf6e3;
+  color: #1f4d2e;
+}
+
+.intro-icon svg {
+  width: 40px;
+  height: 40px;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.intro-icon.heart {
+  color: #e53935;
+}
+
+.booster-gift {
+  display: flex;
+  flex-basis: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #2e7d32;
+}
+
+.booster-gift svg {
+  width: 22px;
+  height: 22px;
+  fill: #ffc107;
+}
+
+.toast {
+  top: 52px;
+  left: 50%;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: calc(100% - 24px);
+  padding: 6px 12px;
+  transform: translateX(-50%);
+  border-radius: 14px;
+  background: rgba(253, 246, 227, 0.96);
+  color: #24321f;
+  font-size: 15px;
+  font-weight: 800;
+  pointer-events: none;
+  animation: modal-in 0.2s ease-out;
+}
+
+#ui > .toast {
+  pointer-events: none;
+}
+
+.toast-image {
+  width: 32px;
+  height: 32px;
+}
+
+/* VIL-02 (flower garden): the booster of the day and its name. */
+.gift-text {
+  flex-basis: 100%;
+  text-align: center;
 }
