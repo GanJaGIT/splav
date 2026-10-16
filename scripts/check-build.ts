@@ -79,7 +79,7 @@ for (const { path, text } of texts) {
 }
 check('no http:// and https:// except allowed (TECH-04, п. 8.4)', [...new Set(urlProblems)]);
 check('no links to Yandex S3 (п. 1.7)', hostProblems);
-check('no dev test hooks (DEV-02)', devProblems);
+check('no dev test hooks and no stand-in ads (DEV-02, YG-13)', devProblems);
 
 const html = texts.find((t) => t.path === 'index.html')?.text ?? '';
 const sdkAt = html.search(/<script[^>]*\ssrc="\/sdk\.js"/);

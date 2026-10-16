@@ -42,6 +42,19 @@ export class GameplayState {
     return this.playing;
   }
 
+  /**
+   * YG-03, YG-04: on game_api_resume the platform calls GameplayAPI.start() by itself, but the
+   * level stays on its Pause window until "Continue": stop() is sent again so the platform knows.
+   */
+  reassert(): void {
+    if (this.playing) return;
+    try {
+      this.platform.gameplayStop();
+    } catch {
+      // §5.1
+    }
+  }
+
   private wanted(): boolean {
     return this.inLevel && this.windows === 0 && !this.suspended;
   }

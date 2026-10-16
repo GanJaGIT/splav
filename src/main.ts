@@ -1,15 +1,19 @@
 import { App } from './app';
-import { boosters, buildings, residents } from './content';
+import { config } from './config';
+import { boosters, buildings, residents, shopProducts } from './content';
 import { levelOrder, levels } from './content/levels';
 import { createGame, resizeGame } from './game/createGame';
 import { dictionaries, supportedLangs } from './i18n';
 import { createPlatform } from './platform';
+import { AdService } from './services/ads';
 import { AudioService } from './services/audio';
 import { GameplayState } from './services/gameplay-state';
 import { I18n, resolveLang } from './services/I18n';
+import { LeaderboardService } from './services/leaderboard';
 import { Lifecycle } from './services/lifecycle';
 import { ProgressService } from './services/progress';
 import { SaveService } from './services/save';
+import { ShopService } from './services/shop';
 import { LoadingScreen } from './ui/loading';
 import { installInputGuards, Stage } from './ui/stage';
 import './ui/styles.css';
@@ -32,7 +36,11 @@ async function main(): Promise<void> {
   installInputGuards();
   const loading = new LoadingScreen();
 
-  const platform = createPlatform();
+  // YG-14: purchases behind the flag; dev and e2e builds may turn them on with ?iap=1.
+  const iap =
+    config.features.iap ||
+    (__DEV_HOOKS__ && new URLSearchParams(window.location.search).get('iap') === '1');
+  const { platform, local } = await createPlatform(iap);
   await platform.init();
   loading.progress(0.3);
 
@@ -54,6 +62,16 @@ async function main(): Promise<void> {
     window.addEventListener(type, () => audio.unlock(), { capture: true, once: true });
   }
   const gameplay = new GameplayState(platform);
+  // YG-20: on a phone, fullscreen on the first touch if the platform did not turn it on.
+  window.addEventListener('pointerdown', () => platform.requestFullscreen(), {
+    capture: true,
+    once: true,
+  });
+  // The lifecycle needs the app (it pauses the level); ads need the lifecycle to go silent.
+  let lifecycleRef: Lifecycle | null = null;
+  const ads = new AdService(platform, { setAd: (on) => lifecycleRef?.setAd(on) }, progress);
+  const boards = new LeaderboardService(platform);
+  const shop = new ShopService(platform, progress, shopProducts, iap, () => ads.refreshBanner());
   const stageEl = byId('stage');
   const stage = new Stage(byId('viewport'), stageEl, platform.isDesktop());
 
@@ -90,6 +108,9 @@ async function main(): Promise<void> {
     gameplay,
     scene,
     progress,
+    ads,
+    boards,
+    shop,
     i18n,
     ui: byId('ui'),
     field: byId('canvas-host'),
@@ -97,6 +118,16 @@ async function main(): Promise<void> {
   const lifecycle = new Lifecycle(audio, gameplay, () => app.interrupt());
   lifecycle.attach(platform);
   app.lifecycle = lifecycle;
+  lifecycleRef = lifecycle;
+  // YG-09: after the account selection dialog the chosen progress is read and the village opens.
+  platform.onAccountChange(() => {
+    void save.reloadFromCloud().then(() => {
+      boards.reset();
+      app.accountChanged();
+    });
+  });
+  // YG-14, 1.13.1: purchases the game has not applied yet, at every launch.
+  void shop.init().then(() => app.renderVillage());
   // YG-08: what the cloud has not got yet goes when the tab is hidden.
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') save.flush();
@@ -123,6 +154,7 @@ async function main(): Promise<void> {
       audio,
       gameplay,
       progress,
+      local,
       stage: stageEl,
       isReady: () => ready,
     });

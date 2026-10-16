@@ -17,8 +17,9 @@ export function installInputGuards(): void {
  */
 export class Stage {
   private readonly listeners: ((w: number, h: number) => void)[] = [];
-  width = 0;
-  height = 0;
+  // -1: the first fit always tells the listeners, even when the page has no size yet.
+  width = -1;
+  height = -1;
 
   constructor(
     private readonly viewport: HTMLElement,

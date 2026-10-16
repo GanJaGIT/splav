@@ -1,0 +1,16 @@
+{
+  "products": [
+    {
+      "id": "no_ads",
+      "permanent": true,
+      "noAds": true,
+      "boosters": { "dam": 2, "hook": 1, "joker": 1, "net": 1 }
+    },
+    {
+      "id": "boosters_10",
+      "permanent": false,
+      "noAds": false,
+      "boosters": { "dam": 3, "hook": 3, "joker": 3, "net": 1 }
+    }
+  ]
+}

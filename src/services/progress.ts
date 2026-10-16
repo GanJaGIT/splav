@@ -257,4 +257,83 @@ export class ProgressService {
     Object.assign(this.data.settings, patch);
     this.save.commit();
   }
+
+  // -------------------------------------------------------------------------------------------
+  // Ads, purchases, review (YG-10, YG-14, YG-16)
+
+  /** Campaign levels passed: YG-10 shows fullscreen ads from adsFromLevel on. */
+  completedCount(): number {
+    return this.c.order.filter((id) => this.completed(id)).length;
+  }
+
+  /** YG-10: the server time of the last fullscreen ad, so a reload does not reset the gap. */
+  noteInterstitial(at: number): void {
+    this.data.lastInterstitialAt = at;
+    this.save.commit();
+  }
+
+  /** UI-07: "Double the coins" for a video. */
+  addCoins(n: number): void {
+    if (n <= 0) return;
+    this.data.coins += n;
+    this.save.commit(true);
+  }
+
+  /** YG-08: a purchase goes to the cloud at once. */
+  commitImportant(): void {
+    this.save.commit(true);
+  }
+
+  markReviewAsked(): void {
+    this.data.reviewAsked = true;
+    this.save.commit();
+  }
+
+  // -------------------------------------------------------------------------------------------
+  // The daily river (DAY-01…DAY-04)
+
+  /** DAY-01: the Pier opens the daily river. */
+  dailyOpen(): boolean {
+    return this.c.buildings.some((b) => b.effect.type === 'daily' && this.built(b.id));
+  }
+
+  /** Today's best result (coins earned on the level), 0 before the first win of the day. */
+  dailyBest(day: number): number {
+    return this.data.daily.dayIndex === day ? this.data.daily.best : 0;
+  }
+
+  /**
+   * DAY-02, DAY-04: a won daily attempt. Pays its coins like a replayed level (and the bathhouse),
+   * keeps the best result of the day and gives one open booster for the first win of the day.
+   */
+  dailyWin(
+    day: number,
+    score: number,
+    coins: number,
+    alreadyPaid: number,
+    random: () => number,
+  ): DailyWinResult {
+    if (this.data.daily.dayIndex !== day) {
+      this.data.daily = { dayIndex: day, best: 0, giftTaken: false };
+    }
+    const paid = Math.max(0, Math.round(Math.max(0, coins) * this.coinFactor()) - alreadyPaid);
+    this.data.coins += paid;
+    const newBest = score > this.data.daily.best;
+    if (newBest) this.data.daily.best = score;
+    let gift: BoosterId | null = null;
+    if (!this.data.daily.giftTaken) {
+      gift = this.dailyGiftChoice(random());
+      this.data.boosters[gift] += 1;
+      this.data.daily.giftTaken = true;
+    }
+    this.save.commit(true);
+    return { coins: paid, best: this.data.daily.best, newBest, gift };
+  }
+}
+
+export interface DailyWinResult {
+  coins: number;
+  best: number;
+  newBest: boolean;
+  gift: BoosterId | null;
 }

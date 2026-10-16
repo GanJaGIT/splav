@@ -83,6 +83,15 @@ export interface DevHooks {
   /** Marks a level as passed with these stars and saves. */
   win(id: string, stars: number): void;
   village(): void;
+  /** YG-12: the sticky banner is on (LocalPlatform). */
+  banner(): boolean;
+  /** YG-10, DAY-01: the server clock jumps forward (LocalPlatform). */
+  advanceTime(ms: number): void;
+  /** YG-04: the platform pauses and resumes the game (LocalPlatform). */
+  sdkPause(): void;
+  sdkResume(): void;
+  /** YG-09: the account selection dialog closed with this cloud save (LocalPlatform). */
+  account(save: Partial<SaveData> | null): void;
 }
 
 declare global {
@@ -99,6 +108,7 @@ export interface DevDeps {
   audio: AudioService;
   gameplay: GameplayState;
   progress: ProgressService;
+  local: LocalPlatform | null;
   stage: HTMLElement;
   isReady(): boolean;
 }
@@ -183,6 +193,12 @@ export function installDevHooks(d: DevDeps): void {
       app.renderVillage();
     },
     village: () => app.showVillage(),
+    banner: () => d.local?.stickyVisible ?? false,
+    advanceTime: (ms) => d.local?.advanceTime(ms),
+    sdkPause: () => d.local?.emitPause(),
+    sdkResume: () => d.local?.emitResume(),
+    account: (save) =>
+      d.local?.emitAccountChange(save ? ({ v: 1, updatedAt: 1, ...save } as SaveData) : null),
   };
   if (new URLSearchParams(window.location.search).get('dev') === '1') mountPanel(app);
 }

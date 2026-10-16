@@ -31,9 +31,9 @@ export interface Entries {
 }
 
 /**
- * §5.1: everything the game asks of the platform. Implementations: YandexPlatform (Stage 4)
- * and LocalPlatform (DEV-01). No method may crash the game: failures make ads, purchases
- * and leaderboards unavailable instead.
+ * §5.1: everything the game asks of the platform. Implementations: YandexPlatform (the SDK) and
+ * LocalPlatform (DEV-01). No method may crash the game: failures make ads, purchases and
+ * leaderboards unavailable instead.
  */
 export interface Platform {
   init(): Promise<void>;
@@ -47,6 +47,10 @@ export interface Platform {
   onPause(cb: () => void): void;
   /** game_api_resume */
   onResume(cb: () => void): void;
+  /** YG-09: the player picked another account's progress; the save is read again. */
+  onAccountChange(cb: () => void): void;
+  /** YG-20: fullscreen on a phone, asked on the first touch. */
+  requestFullscreen(): void;
   lang(): string;
   isDesktop(): boolean;
   /** ysdk.serverTime(), fallback Date.now() */

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "no_ads",
+    "title": "Без рекламы",
+    "description": "Без полноэкранной рекламы и баннера. В подарок 5 бустеров",
+    "imageURI": "",
+    "price": "99 YAN",
+    "priceValue": "99",
+    "priceCurrencyCode": "YAN",
+    "getPriceCurrencyImage": "return ''"
+  },
+  {
+    "id": "boosters_10",
+    "title": "Набор бустеров",
+    "description": "3 плотины, 3 багра, 3 радужные капли и 1 сеть",
+    "imageURI": "",
+    "price": "49 YAN",
+    "priceValue": "49",
+    "priceCurrencyCode": "YAN",
+    "getPriceCurrencyImage": "return ''"
+  }
+]

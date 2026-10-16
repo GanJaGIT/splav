@@ -137,6 +137,26 @@ export class SaveService {
     return this.data;
   }
 
+  /**
+   * YG-09: after the account selection dialog the platform's copy is the one the player chose:
+   * it replaces the progress in memory and the local copy (no "fresher wins" here).
+   */
+  async reloadFromCloud(): Promise<void> {
+    let cloud: SaveData | null;
+    try {
+      cloud = migrate(await this.platform.loadSave());
+    } catch {
+      cloud = null;
+    }
+    if (!cloud) return;
+    this.data = cloud;
+    try {
+      this.storage?.setItem(LOCAL_KEY, JSON.stringify(this.data));
+    } catch {
+      // The cloud copy is in memory anyway.
+    }
+  }
+
   /** YG-08: after every change. `important` changes go to the cloud at once. */
   commit(important = false): void {
     this.data.updatedAt = this.now();

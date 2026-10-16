@@ -3,29 +3,41 @@
  * routes simulation events to the header, sound, encyclopedia and windows, and handles pause
  * (YG-04, YG-05, UI-08, UI-15), the end windows (UI-07, GD-51, GD-52), boosters and gifts (INP-04,
  * GD-80), "New" cards (TUT-02), the keyboard (INP-05) and the first tutorial (TUT-01, TUT-03).
+ * Stage 4: ads by their rules (YG-10…YG-12, AdService), the daily river (DAY-01…DAY-04), the
+ * leaderboard, sign-in, the shop and the review (Meta), the desktop shortcut (YG-17).
  * Every change of progress is saved at once through ProgressService (YG-08).
  */
 
 import { BOOSTER_IDS, type BoosterId, type BotKind } from './config';
-import { boosters as boosterDefs, buildings } from './content';
-import { levelOrder, levels } from './content/levels';
+import { boosters as boosterDefs, buildings, dailyTemplate } from './content';
+import { dailyFallback, levelOrder, levels } from './content/levels';
 import { itemImage, obstacleImage, residentImage } from './game/art';
 import { FieldScene, refOfItem } from './game/FieldScene';
 import { FieldInput } from './game/input';
 import { LevelSession } from './game/session';
 import { dictionaries } from './i18n';
+import { Meta } from './meta';
 import type { Platform } from './platform/Platform';
+import type { AdService } from './services/ads';
 import type { AudioService } from './services/audio';
-import { dayIndex } from './services/day';
+import { dayIndex, moscowDate } from './services/day';
 import type { GameplayState } from './services/gameplay-state';
 import { I18n } from './services/I18n';
 import type { Lifecycle } from './services/lifecycle';
+import {
+  DAILY_BOARD,
+  dailyScore,
+  STARS_BOARD,
+  type LeaderboardService,
+} from './services/leaderboard';
 import type { ProgressService } from './services/progress';
+import type { ShopService } from './services/shop';
 import {
   Bot,
   botDelay,
   COMBO_WINDOW_TICKS,
   decide,
+  generateDaily,
   levelResult,
   parseLevelId,
   type Action,
@@ -51,6 +63,12 @@ const RESTORE_SHOW_MS = 900;
 /** TUT-03: "Show tutorial" shows the hint for this long. */
 const TUTORIAL_AGAIN_MS = 4000;
 const CHAINS: Chain[] = ['wood', 'garden', 'stone', 'fish'];
+/** YG-16: the review is asked after the first pass of this level. */
+const REVIEW_LEVEL = 'c1-08';
+/** YG-17: the desktop shortcut is offered after this level. */
+const SHORTCUT_LEVEL = 'c1-12';
+/** YG-16: the stars of the window pop in first. */
+const REVIEW_DELAY_MS = 1500;
 
 export interface AppParts {
   platform: Platform;
@@ -58,6 +76,9 @@ export interface AppParts {
   gameplay: GameplayState;
   scene: FieldScene;
   progress: ProgressService;
+  ads: AdService;
+  boards: LeaderboardService;
+  shop: ShopService;
   i18n: I18n;
   /** DOM overlay for the interface (#ui). */
   ui: HTMLElement;
@@ -80,7 +101,9 @@ export class App {
   readonly drops: number[] = [];
   private hookArmed = false;
   private endTimer = 0;
-  private adBusy = false;
+  readonly meta: Meta;
+  /** DAY-01: the level of each date, generated once. */
+  private readonly dailyLevels = new Map<string, LevelData>();
   private tutorialOn = false;
   /** "Show tutorial" hides the hint at this time (performance.now()); 0 — it stays. */
   private hintUntil = 0;
@@ -111,6 +134,9 @@ export class App {
         },
         encyclopedia: () => this.openEncyclopedia(),
         settings: () => this.openSettings(),
+        daily: () => this.openDaily(),
+        rating: () => this.meta.openRating(),
+        shop: () => this.meta.openShop(),
       },
       p.platform.isDesktop(),
     );
@@ -122,6 +148,19 @@ export class App {
       () => p.gameplay.windowClosed(),
       () => p.audio.play('button'),
     );
+    this.meta = new Meta({
+      platform: p.platform,
+      progress: p.progress,
+      boards: p.boards,
+      shop: p.shop,
+      modals: this.modals,
+      toast: this.toast,
+      i18n: () => this.i18n,
+      changed: () => {
+        p.ads.refreshBanner();
+        this.renderVillage();
+      },
+    });
     this.input = new FieldInput(p.field, p.scene, {
       session: () => this.session,
       blocked: () => this.blocked(),
@@ -151,7 +190,15 @@ export class App {
       parseLevelId(next?.id ?? levelOrder[levelOrder.length - 1] ?? 'c1-01')?.chapter ?? 1;
     this.village.show();
     this.renderVillage();
+    // YG-12: the sticky banner lives in the village only.
+    this.p.ads.setBanner(true);
     this.offerDailyGift();
+  }
+
+  /** YG-09: the player picked another account's progress; it is already loaded. */
+  accountChanged(): void {
+    this.p.audio.setEnabled(this.p.progress.data.settings.sound);
+    this.showVillage();
   }
 
   /** Ends the current level screen; `keepPlaying` when another level starts right away. */
@@ -203,6 +250,11 @@ export class App {
       })),
       play: { enabled: !!next && !next.gate, sub },
       message,
+      daily: {
+        open: pr.dailyOpen(),
+        best: pr.dailyBest(dayIndex(this.p.platform.serverTime())),
+      },
+      shop: this.p.shop.enabled,
     };
   }
 
@@ -367,6 +419,14 @@ export class App {
     // The window shows the booster that "Take" gives.
     const r = Math.random();
     const gift = this.p.progress.dailyGiftChoice(r);
+    const take = (n: number): void => {
+      const id = this.p.progress.takeDailyGift(day, () => r);
+      if (id && n > 1) this.p.progress.addBooster(id, n - 1);
+      this.modals.close();
+      if (id)
+        this.toast.show(this.i18n.t('gift.text', { name: this.i18n.t(`booster.${id}.name`), n }));
+      this.renderVillage();
+    };
     const box = el('div', 'intro-card gift');
     box.appendChild(el('div', 'intro-icon', BOOSTER_ICONS[gift]));
     const text = el('p', 'modal-text gift-text');
@@ -382,18 +442,44 @@ export class App {
           ui: 'daily-take',
           label: this.i18n.t('daily.take'),
           primary: true,
+          onClick: () => take(1),
+        },
+        {
+          // YG-11: one more of the same for a video; without the reward the gift stays one.
+          ui: 'daily-double',
+          label: this.i18n.t('daily.double'),
+          video: true,
           onClick: () => {
-            const id = this.p.progress.takeDailyGift(day, () => r);
-            this.modals.close();
-            if (id)
-              this.toast.show(
-                this.i18n.t('gift.text', { name: this.i18n.t(`booster.${id}.name`), n: 1 }),
-              );
-            this.renderVillage();
+            void this.p.ads.rewarded().then((ok) => take(ok ? 2 : 1));
           },
         },
       ],
     });
+  }
+
+  // -------------------------------------------------------------------------------------------
+  // The daily river (DAY-01…DAY-04)
+
+  /** DAY-01: today's level (Moscow date by the server clock), the same for every player. */
+  openDaily(): void {
+    if (!this.p.progress.dailyOpen()) return;
+    const date = moscowDate(this.p.platform.serverTime());
+    const ready = this.dailyLevels.get(date);
+    if (ready) {
+      this.startLevel(ready);
+      return;
+    }
+    // SIM-71: the bot checks the level first; a short note while it plays.
+    this.toast.show(this.i18n.t('river.loading'));
+    window.setTimeout(() => {
+      const level = generateDaily(date, dailyTemplate, dailyFallback).level;
+      this.dailyLevels.set(date, level);
+      if (this.village.visible() && !this.modals.current()) this.startLevel(level);
+    }, 30);
+  }
+
+  private isDaily(id: string | null | undefined): boolean {
+    return !!id && id.startsWith('daily-');
   }
 
   // -------------------------------------------------------------------------------------------
@@ -404,6 +490,7 @@ export class App {
     if (!level) return;
     this.leaveLevel(true);
     this.village.hide();
+    this.p.ads.setBanner(false);
     this.p.field.hidden = false;
     this.lossPaid = 0;
     this.queuedBoosters = [];
@@ -514,7 +601,7 @@ export class App {
 
   /** A window is open, the level is paused, or an ad is running. */
   blocked(): boolean {
-    return this.modals.current() !== null || (this.session?.paused ?? true) || this.adBusy;
+    return this.modals.current() !== null || (this.session?.paused ?? true) || this.p.ads.showing();
   }
 
   private onTick(events: readonly SimEvent[], state: SimState): void {
@@ -615,7 +702,7 @@ export class App {
   /** The player's pause: button, Escape or KeyP. */
   pause(): void {
     const s = this.session;
-    if (!s || s.state.status !== 'playing' || this.modals.current() || this.adBusy) return;
+    if (!s || s.state.status !== 'playing' || this.modals.current() || this.p.ads.showing()) return;
     this.halt();
     this.openPause();
   }
@@ -623,7 +710,7 @@ export class App {
   /** The player left (tab, focus, SDK pause, resize): the river stops and Pause opens. */
   interrupt(): void {
     const s = this.session;
-    if (!s || this.adBusy) return;
+    if (!s || this.p.ads.showing()) return;
     if (s.state.status !== 'playing' || this.modals.current()) {
       s.paused = true;
       return;
@@ -653,7 +740,11 @@ export class App {
     this.modals.open({
       ui: 'pause',
       title: this.i18n.t('pause.title'),
-      text: this.i18n.has(`level.${id}.name`) ? this.i18n.t(`level.${id}.name`) : undefined,
+      text: this.isDaily(id)
+        ? this.i18n.t('river.title')
+        : this.i18n.has(`level.${id}.name`)
+          ? this.i18n.t(`level.${id}.name`)
+          : undefined,
       buttons: [
         {
           ui: 'pause-continue',
@@ -681,7 +772,7 @@ export class App {
     });
   }
 
-  /** UI-06 (part): sound, calm river, language and version. Login and purchases arrive in Stage 4. */
+  /** UI-06: sound, calm river, language, sign-in, "No ads" (with purchases) and the version. */
   openSettings(): void {
     const t = (k: string, p?: Record<string, string | number>): string => this.i18n.t(k, p);
     const pr = this.p.progress;
@@ -746,6 +837,35 @@ export class App {
       langs.appendChild(btn);
     }
     box.appendChild(langs);
+    // YG-09: sign-in only by this button, with what it gives.
+    if (!this.p.platform.isAuthorized()) {
+      const row = el('div', 'settings-row');
+      const text = el('div', 'settings-label');
+      text.textContent = t('settings.account');
+      const h = el('div', 'settings-hint');
+      h.textContent = t('auth.benefit');
+      text.appendChild(h);
+      const btn = el('button', 'settings-action');
+      btn.type = 'button';
+      btn.dataset.ui = 'settings-login';
+      btn.textContent = t('auth.login');
+      btn.addEventListener('click', () => void this.meta.login(() => this.openSettings()));
+      row.append(text, btn);
+      box.appendChild(row);
+    }
+    // UI-06, YG-14: "No ads" with purchases on.
+    if (this.p.shop.enabled && !pr.data.noAds) {
+      const row = el('div', 'settings-row');
+      const text = el('div', 'settings-label');
+      text.textContent = t('settings.noAds');
+      const btn = el('button', 'settings-action');
+      btn.type = 'button';
+      btn.dataset.ui = 'settings-noads';
+      btn.textContent = t('village.shop');
+      btn.addEventListener('click', () => this.meta.openShop(() => this.openSettings()));
+      row.append(text, btn);
+      box.appendChild(row);
+    }
     const version = el('div', 'settings-version');
     version.textContent = t('settings.version', { v: APP_VERSION });
     box.appendChild(version);
@@ -782,64 +902,192 @@ export class App {
     const s = this.session;
     if (!s) return;
     s.paused = true;
-    const id = s.level.id;
-    const result = levelResult(s.state, !this.p.progress.completed(id));
-    // GD-52, GD-63: after Continue a part was already paid for the loss.
-    const paid = this.p.progress.win(id, result.stars, result.coins, this.lossPaid);
-    const box = el('div', 'complete');
-    const stars = el('div', 'stars');
-    stars.dataset.ui = 'stars';
-    stars.setAttribute('aria-label', this.i18n.t('complete.stars', { n: result.stars }));
-    for (let i = 0; i < 3; i++) {
-      const star = el('span', `star${i < result.stars ? ' on' : ''}`, ICONS.star);
-      star.style.animationDelay = `${0.15 + i * 0.25}s`;
-      stars.appendChild(star);
+    if (this.isDaily(s.level.id)) {
+      this.showDailyComplete(s);
+      return;
     }
-    const coins = el('div', 'complete-coins', ICONS.coin);
-    coins.dataset.ui = 'complete-coins';
-    const value = el('span', 'complete-coins-value');
-    value.textContent = this.i18n.tp('complete.coins', paid.coins + this.lossPaid);
-    coins.appendChild(value);
-    box.append(stars, coins);
-    if (paid.gift) {
-      const g = el('div', 'booster-gift', ICONS.star);
-      const v = el('span');
-      v.textContent = this.i18n.t('gift.text', {
-        name: this.i18n.t(`booster.${paid.gift.booster}.name`),
-        n: paid.gift.count,
-      });
-      g.appendChild(v);
-      box.appendChild(g);
+    const pr = this.p.progress;
+    const id = s.level.id;
+    const firstWin = !pr.completed(id);
+    const starsBefore = pr.totalStars();
+    const result = levelResult(s.state, firstWin);
+    // GD-52, GD-63: after Continue a part was already paid for the loss.
+    const paid = pr.win(id, result.stars, result.coins, this.lossPaid);
+    const earned = paid.coins + this.lossPaid;
+    // YG-15: the stars leaderboard, when the sum grew.
+    if (pr.totalStars() > starsBefore) this.p.boards.submit(STARS_BOARD, pr.totalStars());
+    // YG-16: once, after the first pass of c1-08.
+    if (firstWin && id === REVIEW_LEVEL) {
+      window.setTimeout(() => void this.meta.askReview(), REVIEW_DELAY_MS);
     }
     const next = this.nextLevelId();
-    this.modals.open({
-      ui: 'level-complete',
-      title: this.i18n.t('complete.title'),
-      content: box,
-      buttons: [
-        ...(next
-          ? [
-              {
-                ui: 'complete-next',
-                label: this.i18n.t('complete.next'),
-                primary: true,
-                onClick: () => this.startLevel(next),
-              },
-            ]
-          : []),
-        {
-          ui: 'complete-village',
-          label: this.i18n.t('complete.village'),
-          primary: !next,
-          onClick: () => this.showVillage(),
-        },
-        {
-          ui: 'complete-replay',
-          label: this.i18n.t('complete.replay'),
-          onClick: () => this.restart(),
-        },
-      ],
-    });
+    let doubled = false;
+    let shortcut = false;
+    const open = (): void => {
+      const box = el('div', 'complete');
+      const stars = el('div', 'stars');
+      stars.dataset.ui = 'stars';
+      stars.setAttribute('aria-label', this.i18n.t('complete.stars', { n: result.stars }));
+      for (let i = 0; i < 3; i++) {
+        const star = el('span', `star${i < result.stars ? ' on' : ''}`, ICONS.star);
+        star.style.animationDelay = `${0.15 + i * 0.25}s`;
+        stars.appendChild(star);
+      }
+      const coins = el('div', 'complete-coins', ICONS.coin);
+      coins.dataset.ui = 'complete-coins';
+      const value = el('span', 'complete-coins-value');
+      value.textContent = this.i18n.tp('complete.coins', doubled ? earned * 2 : earned);
+      coins.appendChild(value);
+      box.append(stars, coins);
+      if (paid.gift) {
+        const g = el('div', 'booster-gift', ICONS.star);
+        const v = el('span');
+        v.textContent = this.i18n.t('gift.text', {
+          name: this.i18n.t(`booster.${paid.gift.booster}.name`),
+          n: paid.gift.count,
+        });
+        g.appendChild(v);
+        box.appendChild(g);
+      }
+      this.modals.open({
+        ui: 'level-complete',
+        title: this.i18n.t('complete.title'),
+        content: box,
+        buttons: [
+          ...(next
+            ? [
+                {
+                  ui: 'complete-next',
+                  label: this.i18n.t('complete.next'),
+                  primary: true,
+                  onClick: () => void this.afterComplete(() => this.startLevel(next)),
+                },
+              ]
+            : []),
+          // UI-07, YG-11: the same coins once more for a video.
+          ...(earned > 0 && !doubled
+            ? [
+                {
+                  ui: 'complete-double',
+                  label: this.i18n.t('complete.double'),
+                  video: true,
+                  onClick: () => {
+                    void this.p.ads.rewarded().then((ok) => {
+                      if (!ok || doubled || this.session !== s) return;
+                      doubled = true;
+                      pr.addCoins(earned);
+                      this.toast.show(this.i18n.t('complete.doubled'));
+                      open();
+                    });
+                  },
+                },
+              ]
+            : []),
+          {
+            ui: 'complete-village',
+            label: this.i18n.t('complete.village'),
+            primary: !next,
+            onClick: () => void this.afterComplete(() => this.showVillage()),
+          },
+          {
+            ui: 'complete-replay',
+            label: this.i18n.t('complete.replay'),
+            onClick: () => this.restart(),
+          },
+          // YG-17: after c1-12, when the platform can make a shortcut.
+          ...(shortcut
+            ? [
+                {
+                  ui: 'complete-shortcut',
+                  label: this.i18n.t('complete.shortcut'),
+                  onClick: () => {
+                    void this.p.platform.shortcut.show().then(() => {
+                      shortcut = false;
+                      if (this.session === s && this.modals.current() === 'level-complete') open();
+                    });
+                  },
+                },
+              ]
+            : []),
+        ],
+      });
+    };
+    open();
+    if (id === SHORTCUT_LEVEL) {
+      void this.p.platform.shortcut.canShow().then((ok) => {
+        if (!ok || this.session !== s || this.modals.current() !== 'level-complete') return;
+        shortcut = true;
+        open();
+      });
+    }
+  }
+
+  /**
+   * YG-10: "Next" and "To the village" may show a fullscreen ad first (from c1-06 on, at most once
+   * in 180 s, never with "No ads"); the next screen comes after it is closed.
+   */
+  private async afterComplete(go: () => void): Promise<void> {
+    if (this.p.ads.showing()) return;
+    if (this.p.ads.interstitialDue()) await this.p.ads.interstitial();
+    go();
+  }
+
+  /** DAY-02…DAY-04: the result of the day, the best of today, a booster for the first win. */
+  private showDailyComplete(s: LevelSession): void {
+    const pr = this.p.progress;
+    const day = dayIndex(this.p.platform.serverTime());
+    const result = levelResult(s.state, false);
+    const won = pr.dailyWin(day, result.levelCoins, result.coins, this.lossPaid, Math.random);
+    const calm = pr.data.settings.calm;
+    // DAY-03, CALM-01: the best of the day goes to the leaderboard, not with the calm river.
+    if (won.newBest && !calm) this.p.boards.submit(DAILY_BOARD, dailyScore(day, won.best));
+    const open = (): void => {
+      const t = this.i18n;
+      const box = el('div', 'complete');
+      const coins = el('div', 'complete-coins', ICONS.coin);
+      coins.dataset.ui = 'complete-coins';
+      const value = el('span', 'complete-coins-value');
+      value.textContent = t.tp('complete.coins', won.coins + this.lossPaid);
+      coins.appendChild(value);
+      box.appendChild(coins);
+      const lines = [
+        t.t('river.score', { n: result.levelCoins }),
+        won.newBest ? t.t('river.newBest') : t.t('river.best', { n: won.best }),
+        ...(calm ? [t.t('river.calm')] : []),
+      ];
+      for (const line of lines) {
+        const p = el('p', 'modal-text');
+        p.textContent = line;
+        box.appendChild(p);
+      }
+      if (won.gift) {
+        const g = el('div', 'booster-gift', ICONS.star);
+        const v = el('span');
+        v.textContent = t.t('river.gift', { name: t.t(`booster.${won.gift}.name`) });
+        g.appendChild(v);
+        box.appendChild(g);
+      }
+      this.modals.open({
+        ui: 'level-complete',
+        title: t.t('river.complete'),
+        content: box,
+        buttons: [
+          {
+            ui: 'complete-village',
+            label: t.t('complete.village'),
+            primary: true,
+            onClick: () => void this.afterComplete(() => this.showVillage()),
+          },
+          { ui: 'river-again', label: t.t('river.again'), onClick: () => this.restart() },
+          {
+            ui: 'river-rating',
+            label: t.t('river.rating'),
+            onClick: () => this.meta.openRating('daily', open),
+          },
+        ],
+      });
+    };
+    open();
   }
 
   private showLost(): void {
@@ -885,24 +1133,8 @@ export class App {
     this.lossPaid += this.p.progress.loss(levelResult(state, false).coins, this.lossPaid);
   }
 
-  /** YG-11: a rewarded video; the reward comes only when the video was watched. */
-  private async rewarded(): Promise<boolean> {
-    if (this.adBusy) return false;
-    this.adBusy = true;
-    this.lifecycle?.setAd(true);
-    let ok: boolean;
-    try {
-      ok = await this.p.platform.showRewarded();
-    } catch {
-      ok = false;
-    }
-    this.lifecycle?.setAd(false);
-    this.adBusy = false;
-    return ok;
-  }
-
   private async continueForAd(): Promise<void> {
-    const ok = await this.rewarded();
+    const ok = await this.p.ads.rewarded();
     const s = this.session;
     if (!ok || !s || s.state.status !== 'lost') return;
     s.applyNow([{ type: 'continue' }]);
@@ -972,7 +1204,7 @@ export class App {
     const s = this.session;
     if (!s) return;
     this.halt();
-    const ok = await this.rewarded();
+    const ok = await this.p.ads.rewarded();
     if (ok) this.p.progress.addBooster(id, 1);
     this.updateBoosters();
     if (this.session === s && !this.modals.current()) s.paused = false;

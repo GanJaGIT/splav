@@ -79,7 +79,8 @@ interface PierView {
  * so everything is drawn crisp. Items move smoothly between the cells the simulation gives them.
  */
 export class FieldScene extends Phaser.Scene {
-  private layout!: Layout;
+  // A real size comes with the first resize; until then (a hidden page has none) a phone layout.
+  private layout: Layout = computeLayout(360, 640, { cols: 7, rows: 8, backwater: 5 });
   private geometry: FieldGeometry = { cols: 7, rows: 8, backwater: 5 };
   private session: LevelSession | null = null;
   private readonly simEvents: SimEvent[] = [];

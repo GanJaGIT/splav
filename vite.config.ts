@@ -8,10 +8,19 @@ const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 
 /**
  * YG-01: index.html always loads /sdk.js before the game code. Outside the platform
  * (vite dev, vite preview) there is no SDK, so an empty script is served instead of a 404.
+ * The same server gives LocalPlatform the purchase catalog stub.
  */
 function sdkStub(): Plugin {
   const handler: Connect.NextHandleFunction = (req, res, next) => {
-    if (req.url?.split('?')[0] !== '/sdk.js') return next();
+    const path = req.url?.split('?')[0];
+    // YG-14: the purchase catalog stub (Yandex «local launch» format) for LocalPlatform; it lives
+    // in the project root and never goes into dist/.
+    if (path === '/purchases-catalog.json') {
+      res.setHeader('Content-Type', 'application/json');
+      res.end(readFileSync(new URL('./purchases-catalog.json', import.meta.url)));
+      return;
+    }
+    if (path !== '/sdk.js') return next();
     res.setHeader('Content-Type', 'text/javascript');
     res.end('/* The Yandex Games SDK comes from the platform; LocalPlatform is used here. */\n');
   };

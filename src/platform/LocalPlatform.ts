@@ -93,7 +93,10 @@ export class LocalPlatform implements Platform {
   private readonly params: URLSearchParams;
   private readonly pauseListeners: (() => void)[] = [];
   private readonly resumeListeners: (() => void)[] = [];
+  private readonly accountListeners: (() => void)[] = [];
   private readonly startedAt = Date.now();
+  /** DEV-02: tests move the server clock forward (YG-10: the 180 s gap, DAY-01: the next day). */
+  private shift = 0;
   private authorized: boolean;
   private reviewAsked = false;
 
@@ -115,6 +118,12 @@ export class LocalPlatform implements Platform {
   /** Emulates game_api_resume (DEV-02). */
   emitResume(): void {
     for (const cb of this.resumeListeners) cb();
+  }
+
+  /** Emulates the end of the account selection dialog with this cloud save (DEV-02). */
+  emitAccountChange(cloud: SaveData | null): void {
+    writeJson(CLOUD_KEY, cloud);
+    for (const cb of this.accountListeners) cb();
   }
 
   private record(name: string): void {
@@ -145,6 +154,14 @@ export class LocalPlatform implements Platform {
     this.resumeListeners.push(cb);
   }
 
+  onAccountChange(cb: () => void): void {
+    this.accountListeners.push(cb);
+  }
+
+  requestFullscreen(): void {
+    this.record('requestFullscreen');
+  }
+
   lang(): string {
     return this.params.get('lang') ?? navigator.language ?? 'en';
   }
@@ -158,9 +175,14 @@ export class LocalPlatform implements Platform {
     if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
       // Noon in Moscow (UTC+3) of the given day, then the clock runs normally.
       const base = Date.parse(`${date}T12:00:00+03:00`);
-      if (!Number.isNaN(base)) return base + (Date.now() - this.startedAt);
+      if (!Number.isNaN(base)) return base + (Date.now() - this.startedAt) + this.shift;
     }
-    return Date.now();
+    return Date.now() + this.shift;
+  }
+
+  /** DEV-02: the server clock jumps forward. */
+  advanceTime(ms: number): void {
+    this.shift += ms;
   }
 
   async loadSave(): Promise<SaveData | null> {
@@ -212,6 +234,9 @@ export class LocalPlatform implements Platform {
         const res = await fetch('./purchases-catalog.json');
         if (!res.ok) return [];
         const raw = (await res.json()) as CatalogFileEntry[];
+        // In the docs' stub format the currency image is code text ("return ''"), not a URL.
+        const image = (v: string | undefined): string =>
+          v && !v.trim().startsWith('return') ? v : '';
         return raw.map((p) => ({
           id: p.id,
           title: p.title,
@@ -220,7 +245,7 @@ export class LocalPlatform implements Platform {
           price: p.price,
           priceValue: p.priceValue,
           priceCurrencyCode: p.priceCurrencyCode,
-          currencyImageURI: p.getPriceCurrencyImage ?? '',
+          currencyImageURI: image(p.getPriceCurrencyImage),
         }));
       } catch {
         return [];

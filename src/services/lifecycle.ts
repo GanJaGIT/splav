@@ -27,7 +27,11 @@ export class Lifecycle {
     window.addEventListener('pagehide', () => this.set('pagehide', true));
     window.addEventListener('pageshow', () => this.set('pagehide', false));
     platform.onPause(() => this.set('sdk_pause', true));
-    platform.onResume(() => this.set('sdk_pause', false));
+    platform.onResume(() => {
+      this.set('sdk_pause', false);
+      // After the platform's own start() (sdk-events.md), in the next task.
+      setTimeout(() => this.gameplay.reassert(), 0);
+    });
   }
 
   /** An ad, a purchase dialog and the like (YG-10, YG-11). */

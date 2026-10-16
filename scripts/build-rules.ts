@@ -42,7 +42,10 @@ export const ALLOWED_URL_PREFIXES = [
 /** п. 1.7: direct links to Yandex S3 are forbidden. */
 export const FORBIDDEN_HOSTS = ['storage.yandexcloud.net', 'yandex-s3', 's3.yandex'];
 
-/** DEV-02: test hooks must not reach the release build. */
-export const DEV_MARKERS = ['__game'];
+/**
+ * DEV-02: test hooks must not reach the release build; YG-13: nor LocalPlatform with its
+ * stand-in ad overlays (an imitation of ads is forbidden).
+ */
+export const DEV_MARKERS = ['__game', 'dev-overlay', 'Rewarded video (dev)'];
 
 export const TEXT_EXT = ['.html', '.js', '.css', '.json', '.svg', '.txt', '.xml'];
