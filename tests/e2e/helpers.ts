@@ -15,6 +15,12 @@ export async function openGame(page: Page, query = ''): Promise<void> {
   await page.waitForFunction(() => window.__game?.isReady() === true);
 }
 
+/** TUT-02: a "New" card opens before some levels; it waits for "Got it". */
+export async function skipIntro(page: Page): Promise<void> {
+  const ok = page.locator('[data-ui="intro-ok"]');
+  if ((await ok.count()) > 0) await ok.click();
+}
+
 export async function state(page: Page): Promise<ReturnType<DevHooks['state']>> {
   const s = await page.evaluate(() => window.__game?.state());
   if (!s) throw new Error('no game');

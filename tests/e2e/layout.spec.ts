@@ -6,7 +6,7 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import { openGame, state } from './helpers';
 
 const SIZES: [number, number][] = [
@@ -60,7 +60,12 @@ async function check(
   problems: string[],
 ): Promise<void> {
   await page.waitForTimeout(500);
-  await page.screenshot({ path: `${OUT}/${screen}-${w}x${h}-${lang}.png` });
+  // JPEG: a 2560×1080 PNG takes seconds to encode with software rendering.
+  await page.screenshot({
+    path: `${OUT}/${screen}-${w}x${h}-${lang}.jpg`,
+    type: 'jpeg',
+    quality: 80,
+  });
   const report = (what: string): void => {
     problems.push(`${screen}: ${what}`);
   };
@@ -101,6 +106,23 @@ async function check(
       if (ix > 1 && iy > 1) report(`buttons ${a.ui} and ${b.ui} overlap`);
     }
   }
+  // VIL-01: the stars under a level circle do not cover a button.
+  if (!modal) {
+    const covered = await page.evaluate(() => {
+      const hit = (a: DOMRect, b: DOMRect): boolean =>
+        Math.min(a.right, b.right) - Math.max(a.left, b.left) > 1 &&
+        Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 1;
+      const buttons = Array.from(document.querySelectorAll<HTMLElement>('#ui button')).filter(
+        (b) => b.offsetParent !== null,
+      );
+      return Array.from(document.querySelectorAll<HTMLElement>('.level-stars')).flatMap((s) =>
+        buttons
+          .filter((b) => hit(s.getBoundingClientRect(), b.getBoundingClientRect()))
+          .map((b) => `${s.dataset.ui ?? '?'} covers ${b.dataset.ui ?? '?'}`),
+      );
+    });
+    for (const c of covered) report(c);
+  }
   // ACC-03: text is not cut.
   const cut = await page.evaluate(() =>
     Array.from(
@@ -127,20 +149,30 @@ async function check(
   for (const s of small) report(`text smaller than 14 px: ${s}`);
 }
 
+async function openAt(
+  browser: Browser,
+  w: number,
+  h: number,
+  lang: string,
+): Promise<{ context: BrowserContext; page: Page }> {
+  const context = await browser.newContext({
+    viewport: { width: w, height: h },
+    hasTouch: isTouch(w),
+    isMobile: isTouch(w),
+    deviceScaleFactor: 1,
+  });
+  const page = await context.newPage();
+  await openGame(page, `?lang=${lang}`);
+  return { context, page };
+}
+
 for (const [w, h] of SIZES) {
   for (const lang of LANGS) {
-    test(`QA-04 ${w}×${h} ${lang}`, async ({ browser, browserName }) => {
+    test(`QA-04 level ${w}×${h} ${lang}`, async ({ browser, browserName }) => {
       test.skip(browserName !== 'chromium', 'layout runs in Chromium');
-      test.setTimeout(90_000);
-      const context = await browser.newContext({
-        viewport: { width: w, height: h },
-        hasTouch: isTouch(w),
-        isMobile: isTouch(w),
-        deviceScaleFactor: 1,
-      });
-      const page = await context.newPage();
+      test.setTimeout(180_000);
+      const { context, page } = await openAt(browser, w, h, lang);
       const problems: string[] = [];
-      await openGame(page, `?lang=${lang}`);
 
       // UI-13: the desktop active area is at most 2:1, centred and touching the short side.
       if (!isTouch(w)) {
@@ -191,6 +223,49 @@ for (const [w, h] of SIZES) {
       await page.evaluate(() => window.__game?.tick(60));
       await expect(page.locator('[data-ui="level-lost"]')).toBeVisible();
       await check(page, 'lost', w, h, lang, problems);
+
+      await context.close();
+      expect(problems).toEqual([]);
+    });
+
+    test(`QA-04 village ${w}×${h} ${lang}`, async ({ browser, browserName }) => {
+      test.skip(browserName !== 'chromium', 'layout runs in Chromium');
+      test.setTimeout(180_000);
+      const { context, page } = await openAt(browser, w, h, lang);
+      const problems: string[] = [];
+
+      // The village (VIL-01, UI-03). Passed levels show their stars under the circles, next to
+      // the buildings.
+      await page.evaluate(() => {
+        for (let n = 1; n <= 8; n++) window.__game?.win(`c1-0${n}`, 1 + (n % 3));
+        window.__game?.village();
+      });
+      await check(page, 'village', w, h, lang, problems);
+      // A building window (VIL-02), the daily gift, the encyclopedia (GD-23), the settings.
+      await page.evaluate(() => window.__game?.grant(5000));
+      await page.locator('[data-ui="building-flowerbed"]').click();
+      await check(page, 'building', w, h, lang, problems);
+      await page.locator('[data-ui="building-restore"]').click();
+      await page.locator('[data-ui="building-close"]').click();
+      await page.evaluate(() => window.__game?.village());
+      await expect(page.locator('[data-ui="daily-gift"]')).toBeVisible();
+      await expect(page.locator('[data-ui="daily-text"]')).not.toBeEmpty();
+      await check(page, 'daily-gift', w, h, lang, problems);
+      await page.locator('[data-ui="daily-take"]').click();
+      await page.locator('[data-ui="village-encyclopedia"]').click();
+      await check(page, 'encyclopedia', w, h, lang, problems);
+      await page.locator('[data-ui="encyclopedia-close"]').click();
+      await page.locator('[data-ui="village-settings"]').click();
+      await check(page, 'village-settings', w, h, lang, problems);
+      await page.locator('[data-ui="settings-close"]').click();
+
+      // "New" cards (TUT-02): a chain and a booster with its gift.
+      await page.evaluate(() => window.__game?.openLevel('c1-02'));
+      await expect(page.locator('[data-ui="intro"]')).toBeVisible();
+      await check(page, 'intro', w, h, lang, problems);
+      await page.evaluate(() => window.__game?.openLevel('c1-09'));
+      await expect(page.locator('[data-ui="intro"] .intro-icon')).toBeVisible();
+      await check(page, 'intro-booster', w, h, lang, problems);
 
       await context.close();
       expect(problems).toEqual([]);

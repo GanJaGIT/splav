@@ -17,7 +17,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: 0,
   reporter: [['list']],
-  timeout: 30_000,
+  // Real-time tests (a bot plays a level) need ~20 s; a busy machine with software WebGL more.
+  timeout: 60_000,
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: 'off',

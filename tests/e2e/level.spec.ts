@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import {
+  skipIntro,
   mouseDrag,
   mouseTap,
   openGame,
@@ -64,6 +65,7 @@ test('YG-05, YG-03: blur silences the sound, stops the river and opens Pause; Co
   page,
 }) => {
   await openGame(page, '?level=c1-02');
+  await skipIntro(page);
   await page.waitForFunction(() => (window.__game?.state().tick ?? 0) > 5);
   expect((await state(page)).playing).toBe(true);
 
@@ -95,6 +97,7 @@ test('YG-05, YG-03: blur silences the sound, stops the river and opens Pause; Co
 
 test('YG-05: a hidden tab silences the sound and pauses the level', async ({ page }) => {
   await openGame(page, '?level=c1-02');
+  await skipIntro(page);
   await page.waitForFunction(() => (window.__game?.state().tick ?? 0) > 5);
   await page.evaluate(() => {
     Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
@@ -211,6 +214,7 @@ test('GD-51, GD-52: losing opens the window, Continue for an ad brings the level
 
 test('DEV-02: the bot plays c1-04 in real time to "Level complete"', async ({ page }) => {
   await openGame(page, '?level=c1-04');
+  await skipIntro(page);
   await page.evaluate(() => {
     window.__game?.bot('normal');
     window.__game?.setSpeed(10);
@@ -219,6 +223,7 @@ test('DEV-02: the bot plays c1-04 in real time to "Level complete"', async ({ pa
   const st = await state(page);
   expect(st.status).toBe('won');
   expect(st.coins).toBeGreaterThan(100);
-  await expect(page.locator('[data-ui="complete-next"]')).toHaveCount(0);
+  await expect(page.locator('[data-ui="complete-next"]')).toBeVisible();
+  await expect(page.locator('[data-ui="complete-village"]')).toBeVisible();
   await expect(page.locator('[data-ui="complete-replay"]')).toBeVisible();
 });
