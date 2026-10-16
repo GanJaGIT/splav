@@ -154,6 +154,7 @@ async function openAt(
   w: number,
   h: number,
   lang: string,
+  extra = '',
 ): Promise<{ context: BrowserContext; page: Page }> {
   const context = await browser.newContext({
     viewport: { width: w, height: h },
@@ -162,7 +163,7 @@ async function openAt(
     deviceScaleFactor: 1,
   });
   const page = await context.newPage();
-  await openGame(page, `?lang=${lang}`);
+  await openGame(page, `?lang=${lang}${extra}`);
   return { context, page };
 }
 
@@ -231,7 +232,7 @@ for (const [w, h] of SIZES) {
     test(`QA-04 village ${w}×${h} ${lang}`, async ({ browser, browserName }) => {
       test.skip(browserName !== 'chromium', 'layout runs in Chromium');
       test.setTimeout(180_000);
-      const { context, page } = await openAt(browser, w, h, lang);
+      const { context, page } = await openAt(browser, w, h, lang, '&iap=1');
       const problems: string[] = [];
 
       // The village (VIL-01, UI-03). Passed levels show their stars under the circles, next to
@@ -242,7 +243,11 @@ for (const [w, h] of SIZES) {
       });
       await check(page, 'village', w, h, lang, problems);
       // A building window (VIL-02), the daily gift, the encyclopedia (GD-23), the settings.
-      await page.evaluate(() => window.__game?.grant(5000));
+      // Five-digit coins: the widest header (UI-03).
+      await page.evaluate(() => window.__game?.grant(25_000));
+      await page.locator('[data-ui="building-pier"]').click();
+      await page.locator('[data-ui="building-restore"]').click();
+      await page.locator('[data-ui="building-close"]').click();
       await page.locator('[data-ui="building-flowerbed"]').click();
       await check(page, 'building', w, h, lang, problems);
       await page.locator('[data-ui="building-restore"]').click();
@@ -258,6 +263,20 @@ for (const [w, h] of SIZES) {
       await page.locator('[data-ui="village-settings"]').click();
       await check(page, 'village-settings', w, h, lang, problems);
       await page.locator('[data-ui="settings-close"]').click();
+
+      // Stage 4: the village with the daily river and the shop, the leaderboard (sign-in
+      // offered), the shop window.
+      await expect(page.locator('[data-ui="village-daily"]')).toBeVisible();
+      await expect(page.locator('[data-ui="village-shop"]')).toBeVisible();
+      await check(page, 'village-stage4', w, h, lang, problems);
+      await page.locator('[data-ui="village-rating"]').click();
+      await expect(page.locator('[data-ui="rating-note"]')).not.toHaveText(/…/);
+      await check(page, 'rating', w, h, lang, problems);
+      await page.locator('[data-ui="rating-close"]').click();
+      await page.locator('[data-ui="village-shop"]').click();
+      await expect(page.locator('[data-ui="shop-item-no_ads"]')).toBeVisible();
+      await check(page, 'shop', w, h, lang, problems);
+      await page.locator('[data-ui="shop-close"]').click();
 
       // "New" cards (TUT-02): a chain and a booster with its gift.
       await page.evaluate(() => window.__game?.openLevel('c1-02'));

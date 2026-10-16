@@ -137,3 +137,60 @@ export async function playThrough(
   }
   return (await state(page)).status ?? 'none';
 }
+
+/** A save written before the game loads (only if there is none yet). */
+export async function presetSave(page: Page, save: Record<string, unknown>): Promise<void> {
+  await page.addInitScript((data) => {
+    if (!localStorage.getItem('splav.save')) {
+      localStorage.setItem('splav.save', JSON.stringify({ v: 1, updatedAt: 1, ...data }));
+    }
+  }, save);
+}
+
+/** Levels c1-01 … c1-<n> passed with 2 stars. */
+export function passed(n: number): Record<string, { stars: number }> {
+  const levels: Record<string, { stars: number }> = {};
+  for (let i = 1; i <= n; i++) levels[`c1-${String(i).padStart(2, '0')}`] = { stars: 2 };
+  return levels;
+}
+
+/** A level won with one delivery: the "Level complete" window opens at once. */
+export async function quickWin(page: Page, id = 'c1-91'): Promise<void> {
+  await page.evaluate((levelId) => {
+    window.__game?.openLevel({
+      id: levelId,
+      chapter: 1,
+      lanes: 3,
+      rows: 7,
+      stepTicks: 2,
+      seed: 5,
+      waitFirstMerge: true,
+      spawn: { perStep: [3, 3], weights: [{ chain: 'garden', level: 1, w: 1 }] },
+      initial: [
+        { col: 3, row: 2, chain: 'wood', level: 1 },
+        { col: 0, row: 3, chain: 'wood', level: 1 },
+        { col: 0, row: 4, chain: 'wood', level: 1 },
+      ],
+      script: [],
+      piers: [{ col: 4, row: 2, resident: 'fisher', orders: [{ chain: 'wood', level: 1 }] }],
+      obstacles: [],
+      backwater: 1,
+      lives: 3,
+      intro: null,
+      gift: null,
+    });
+    window.__game?.stopTime();
+    // A merge first (coins), then the delivery wins.
+    window.__game?.act([
+      { type: 'grab', ref: { at: 'cell', col: 0, row: 3 } },
+      { type: 'drop', ref: { at: 'cell', col: 0, row: 4 } },
+    ]);
+    window.__game?.tick(1);
+    window.__game?.act([
+      { type: 'grab', ref: { at: 'cell', col: 3, row: 2 } },
+      { type: 'drop', ref: { at: 'cell', col: 4, row: 2 } },
+    ]);
+    window.__game?.tick(1);
+  }, id);
+  await page.locator('[data-ui="level-complete"]').waitFor();
+}

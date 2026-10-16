@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { openGame, skipIntro, state } from './helpers';
+import { openGame, presetSave, skipIntro, state } from './helpers';
 
 /** QA-03 (saves), YG-07…YG-09, UI-02, VIL-01…VIL-04, TUT-02, GD-23: Chromium and mobile WebKit. */
 
@@ -10,15 +10,6 @@ async function winCurrentLevel(page: Page): Promise<void> {
     window.__game?.setSpeed(20);
   });
   await expect(page.locator('[data-ui="level-complete"]')).toBeVisible({ timeout: 40_000 });
-}
-
-/** A save written before the game loads (only if there is none yet). */
-async function presetSave(page: Page, save: Record<string, unknown>): Promise<void> {
-  await page.addInitScript((data) => {
-    if (!localStorage.getItem('splav.save')) {
-      localStorage.setItem('splav.save', JSON.stringify({ v: 1, updatedAt: 1, ...data }));
-    }
-  }, save);
 }
 
 test('YG-08, UI-02: a passed level and its coins survive a reload; the next launch opens the village', async ({
