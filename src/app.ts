@@ -19,7 +19,7 @@ import { dictionaries } from './i18n';
 import { Meta } from './meta';
 import type { Platform } from './platform/Platform';
 import type { AdService } from './services/ads';
-import type { AudioService } from './services/audio';
+import { mergePitch, type AudioService } from './services/audio';
 import { dayIndex, moscowDate } from './services/day';
 import type { GameplayState } from './services/gameplay-state';
 import { I18n } from './services/I18n';
@@ -621,8 +621,7 @@ export class App {
           break;
         case 'merge': {
           // SND-01: one base sound, higher with the item level and the combo.
-          const pitch = Math.pow(2, (e.level - 2 + Math.min(e.combo, 4) - 1) / 12);
-          this.p.audio.play(e.cascade ? 'cascade' : 'merge', pitch);
+          this.p.audio.play(e.cascade ? 'cascade' : 'merge', mergePitch(e.level, e.combo));
           if (e.combo >= 2 && !e.cascade)
             this.p.audio.play('combo', Math.pow(2, (e.combo - 2) / 12));
           this.found(e.chain, e.level);

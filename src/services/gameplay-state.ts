@@ -16,7 +16,11 @@ export class GameplayState {
   private startPending = false;
   private ready = false;
 
-  constructor(private readonly platform: Platform) {}
+  /** `onPlaying` hears every change (SND-02: the river murmurs only while the level is played). */
+  constructor(
+    private readonly platform: Platform,
+    private readonly onPlaying: (playing: boolean) => void = () => undefined,
+  ) {}
 
   /** YG-02: LoadingAPI.ready() was sent; from now on start() and stop() go to the platform. */
   setReady(): void {
@@ -84,6 +88,7 @@ export class GameplayState {
   private send(playing: boolean): void {
     if (playing === this.playing) return;
     this.playing = playing;
+    this.onPlaying(playing);
     try {
       if (playing) this.platform.gameplayStart();
       else this.platform.gameplayStop();

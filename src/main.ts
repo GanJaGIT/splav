@@ -68,7 +68,7 @@ async function main(): Promise<void> {
   for (const type of ['pointerdown', 'keydown']) {
     window.addEventListener(type, () => audio.unlock(), { capture: true, once: true });
   }
-  const gameplay = new GameplayState(platform);
+  const gameplay = new GameplayState(platform, (on) => audio.setRiver(on));
   // YG-20: on a phone, fullscreen on the first touch if the platform did not turn it on.
   window.addEventListener('pointerdown', () => platform.requestFullscreen(), {
     capture: true,

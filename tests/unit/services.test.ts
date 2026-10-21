@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { LevelSession } from '../../src/game/session';
 import type { Platform } from '../../src/platform/Platform';
-import { AudioService } from '../../src/services/audio';
+import { AudioService, mergePitch } from '../../src/services/audio';
 import { GameplayState } from '../../src/services/gameplay-state';
 import { level } from './sim/helpers';
 
@@ -36,6 +36,23 @@ describe('GameplayState (YG-03)', () => {
     g.setSuspended(true);
     expect(calls).toEqual(['start', 'stop', 'start', 'stop']);
     expect(g.isPlaying()).toBe(false);
+  });
+
+  it('SND-02: tells the river murmur when the level is played and when it stops', async () => {
+    const { platform } = fakePlatform();
+    const audio = new AudioService();
+    const g = new GameplayState(platform, (on) => audio.setRiver(on));
+    g.setReady();
+    g.setInLevel(true);
+    await flush();
+    expect(audio.riverOn()).toBe(true);
+    g.windowOpened();
+    expect(audio.riverOn()).toBe(false);
+    g.windowClosed();
+    await flush();
+    expect(audio.riverOn()).toBe(true);
+    g.setInLevel(false);
+    expect(audio.riverOn()).toBe(false);
   });
 
   it('closing one window and opening another in one go sends nothing (п. 1.19.3)', async () => {
@@ -97,6 +114,13 @@ describe('AudioService (YG-05, FX-06)', () => {
     expect(a.isEnabled()).toBe(true);
     a.play('merge');
     expect(a.played).toEqual(['merge']);
+  });
+
+  it('SND-01: merges go up a pentatonic scale with the level and the combo', () => {
+    const steps = [1, 2, 3, 4, 5, 6].map((lvl) => Math.round(12 * Math.log2(mergePitch(lvl, 1))));
+    expect(steps).toEqual([0, 2, 4, 7, 9, 12]);
+    expect(mergePitch(2, 3)).toBeCloseTo(mergePitch(4, 1));
+    expect(mergePitch(6, 9)).toBe(mergePitch(6, 4));
   });
 
   it('plays at most 6 sounds a second', () => {
