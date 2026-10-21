@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -8 84 72">
+<defs>
+<linearGradient id="mx-wl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9d6cf"/><stop offset="1" stop-color="#b9b0a2"/></linearGradient>
+<linearGradient id="mx-rf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9b0a2"/><stop offset="1" stop-color="#9a9184"/></linearGradient>
+<linearGradient id="mx-wa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6ccdf0"/><stop offset=".5" stop-color="#3faee0"/><stop offset="1" stop-color="#2a8cc4"/></linearGradient>
+</defs>
+<ellipse cx="42" cy="60" rx="40" ry="4" fill="#1d3b2a" opacity=".18"/>
+<g stroke="#4a2f1b" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">
+<rect x="4" y="28" width="44" height="28" fill="url(#mx-wl)"/>
+<path d="M40 30H48V56H40Z" fill="#9a9184" opacity=".5" stroke="none"/>
+<path d="M4 31H48V35H4Z" fill="#4a2f1b" opacity=".15" stroke="none"/>
+<path d="M8 38Q8 35 11 35.5L15 35Q17 37 16 40L14 43.5Q10 44 8.5 42Z" fill="#9a9184" stroke-width="1.4"/>
+<path d="M8.5 38.5h7M8.5 41.5h6.5M11.5 35.5v3M13 38.5v3" stroke="#7a7266" stroke-width="1"/>
+<path d="M5 28V56M47 28V56" stroke-width="3.6"/><path d="M5 28V56M47 28V56" stroke="#9a9184" stroke-width="1.4"/>
+<rect x="18" y="35.5" width="9" height="9" rx="1" fill="#4e463d" stroke-width="1.8"/>
+<path d="M20 38l2 2.5-1 2.5M24.5 37l-1 3" stroke="#d9d6cf" stroke-width="1"/>
+<path d="M29.5 35.5h3v9h-3" fill="#9a9184" stroke-width="1.6" transform="rotate(14 29.5 35.5)"/>
+<path d="M16 36L29 44M16 44L29 36" stroke-width="4.4"/><path d="M16 36L29 44M16 44L29 36" stroke="#b9b0a2" stroke-width="2.4"/>
+<path d="M33 56V42.5Q33 37.5 37.5 37.5Q42 37.5 42 42.5V56Z" fill="#3b2a1e"/>
+<path d="M33 56V43Q33 38 37.5 38Q41.5 38 41.5 43V56Z" fill="#7a7266" transform="rotate(-9 33 56)"/>
+<path d="M35.5 39.5l1.4 16M38.2 39.5l2.3 16" stroke="#5f584e" stroke-width="1.2" transform="rotate(-9 33 56)"/>
+<path d="M2 32L11 8.5H41L50 32Z" fill="url(#mx-rf)"/>
+<path d="M9.5 15q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0M7 21q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0M4.5 27q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0q2 2.6 4 0" fill="none" stroke="#7a7266" stroke-width="1.3"/>
+<path d="M37 8.5H41L50 32H44Z" fill="#4a2f1b" opacity=".1" stroke="none"/>
+<path d="M27 12L35 11L38 16L36 22L29 23L26 18Z" fill="#3b2a1e" stroke-width="1.6"/>
+<path d="M28.5 11.5L30.5 23M33.5 11.2L34.5 22.5" stroke-width="3.4"/><path d="M28.5 11.5L30.5 23M33.5 11.2L34.5 22.5" stroke="#9a9184" stroke-width="1.6"/>
+<path d="M9.5 24.2L12 22.2L14 23.6L16.5 22.6L16 26L13.2 28.2L10.5 27.2Z" fill="#3b2a1e" stroke-width="1.4"/>
+<path d="M14 10Q18 8 21 10.5Q18 13 14.5 12Z" fill="#8fae6a" stroke="#24432c" stroke-width="1.2"/>
+<path d="M40 25Q44 23 47 26Q44 28.5 40.5 27.5Z" fill="#8fae6a" stroke="#24432c" stroke-width="1.2"/>
+<path d="M10.5 8.5H24M28 8.5H41.5" stroke-width="4.4"/><path d="M10.5 8.5H24M28 8.5H41.5" stroke="#9a9184" stroke-width="2"/>
+<path d="M18 8.5L15 0" stroke-width="1.4"/>
+<rect x="2" y="54" width="48" height="6" rx="2.5" fill="#948e83"/>
+<path d="M10 54.5v5M19 54.5v5M28 54.5v5M37 54.5v5" stroke="#6f6a61" stroke-width="1.2"/>
+<path d="M20 54.5Q25 52.5 30 54.6Q25 56.5 20 54.5Z" fill="#8fae6a" stroke="none"/>
+<g fill="#b9b0a2" stroke-width="1.6">
+<rect x="60.2" y="18" width="3.6" height="7.5" rx=".8" transform="rotate(11.25 62 39)"/><rect x="60.2" y="18" width="3.6" height="7.5" rx=".8" transform="rotate(78.75 62 39)"/><rect x="60.2" y="18" width="3.6" height="7.5" rx=".8" transform="rotate(101.25 62 39)"/><rect x="60.2" y="18" width="3.6" height="7.5" rx=".8" transform="rotate(146.25 62 39)"/><rect x="60.2" y="18" width="3.6" height="7.5" rx=".8" transform="rotate(168.75 62 39)"/><rect x="60.2" y="18" width="3.6" height="7.5" rx=".8" transform="rotate(236.25 62 39)"/><rect x="60.2" y="18" width="3.6" height="7.5" rx=".8" transform="rotate(258.75 62 39)"/><rect x="60.2" y="18" width="3.6" height="7.5" rx=".8" transform="rotate(303.75 62 39)"/><rect x="60.2" y="18" width="3.6" height="7.5" rx=".8" transform="rotate(326.25 62 39)"/>
+</g>
+<path d="M76.6 33.7A15.5 15.5 0 1 1 67.3 24.4" fill="none" stroke-width="6.4"/>
+<path d="M76.6 33.7A15.5 15.5 0 1 1 67.3 24.4" fill="none" stroke="#9a9184" stroke-width="3.6"/>
+<path d="M73.3 34.9A12 12 0 1 1 66.1 27.7" fill="none" stroke-width="1.2"/>
+<path d="M50 32.5A13.8 13.8 0 0 1 58 25.6" fill="none" stroke="#d9d6cf" stroke-width="1.4"/>
+<path d="M50.5 39H73.5M62 27.5V50.5M53.9 47.1L62 39L66 35" stroke-width="3.8"/>
+<path d="M50.5 39H73.5M62 27.5V50.5M53.9 47.1L62 39L66 35" stroke="#7a7266" stroke-width="1.8"/>
+<circle cx="62" cy="39" r="4" fill="#7a7266"/>
+<circle cx="62" cy="39" r="1.5" fill="#b9b0a2" stroke-width="1.2"/>
+<rect x="77" y="31" width="3.6" height="7.5" rx=".8" fill="#b9b0a2" stroke-width="1.6" transform="rotate(28 77 31)"/>
+<path d="M34.5 56C34 52 38 51.5 42 52C49 50.5 57 52.5 64 51.5C71 50.8 79 50.5 82.5 53.5C85 56.5 83 61.5 77 62.3C68 63.5 56 62 47 62.8C40 63.3 35 60.5 34.5 56Z" fill="url(#mx-wa)" stroke="#1d4a4f"/>
+<path d="M37 60C46 61.5 64 61.5 82.5 57.5C82 60.5 80 62 77 62.3C68 63.5 56 62 47 62.8C42 63.2 38.5 62 37 60Z" fill="#1f6f9e" opacity=".35" stroke="none"/>
+<g fill="#8fae6a" stroke="#24432c" stroke-width="1.2"><ellipse cx="45" cy="57" rx="3.4" ry="1.3"/><ellipse cx="74" cy="58.5" rx="4" ry="1.5"/><ellipse cx="79" cy="55" rx="2" ry=".9"/></g>
+<path d="M51 56.5q4 1.5 8 0M65 56.5q4 1.5 8 0" fill="none" stroke="#bdeeff" stroke-width="1.4"/>
+<path d="M1 60Q0 55 3 53Q5 50 9 51Q8 54 11 55Q15 55 16 58Q16 60 14 60.5H3Z" fill="#b9b0a2"/>
+<path d="M9 51l1.5-2.5M10.5 52l2-1.5" stroke-width="1.2"/>
+<path d="M4 56Q7 55 9 57" fill="none" stroke="#7a7266" stroke-width="1.2"/>
+<g fill="#8fae6a" stroke="#24432c" stroke-width="1.3">
+<path d="M23 61Q23 56 21.5 53Q24.5 54.5 25 58Q25 53 27.5 50Q29 55 27 59.5Q29.5 56 33 55Q31 58.5 30.5 61Z"/>
+<path d="M44 52Q42 47 40 45Q43.5 45.5 45 49Q45.5 44 48 41Q49 46 46.5 51Z"/>
+</g>
+</g>
+</svg>

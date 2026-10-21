@@ -13,10 +13,9 @@ export function pixelRatio(): number {
  */
 export function createGame(
   parent: HTMLElement,
-  residents: readonly string[],
   onFirstFrame: () => void,
 ): { game: Phaser.Game; scene: FieldScene } {
-  const scene = new FieldScene(residents, onFirstFrame);
+  const scene = new FieldScene(onFirstFrame);
   const game = new Phaser.Game({
     // PERF-04: Phaser 4 still has the Canvas renderer, so AUTO falls back to it without WebGL.
     type: Phaser.AUTO,

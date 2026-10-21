@@ -1,26 +1,24 @@
 import { BOOSTER_IDS, type BoosterId } from '../config';
 import type { I18n } from '../services/I18n';
+import { icon } from './icons';
 import type { Layout, Rect } from './layout';
 
-/** Temporary interface icons; the final ones come from art/ in Stage 5 (ART-02). */
+/** ART-02: interface icons (art/ui). */
 export const ICONS = {
-  pause:
-    '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1.5"/><rect x="14" y="4" width="4" height="16" rx="1.5"/></svg>',
-  heart:
-    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.9 4.5 6.6 4.5c2.2 0 3.6 1.3 4.4 2.6.8-1.3 2.2-2.6 4.4-2.6 3.7 0 5.7 3.9 4.2 7.3C19.5 16.4 12 21 12 21z"/><path class="crack" d="M12 7l-1.5 4 2.5 2-2 5" fill="none"/></svg>',
-  coin: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.5" fill="none" stroke-width="2"/></svg>',
-  video:
-    '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="15" height="14" rx="3"/><path d="M17 10l5-3v10l-5-3z"/></svg>',
-  lock: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke-width="2.5"/></svg>',
-  star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5-4.9-4.5 6.6-.8z"/></svg>',
+  pause: icon('pause'),
+  heart: icon('heart'),
+  heartBroken: icon('heart-broken'),
+  coin: icon('coin'),
+  video: icon('video'),
+  lock: icon('lock'),
+  star: icon('star'),
 } as const;
 
 export const BOOSTER_ICONS: Record<BoosterId, string> = {
-  dam: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="15" width="18" height="4" rx="1"/></svg>',
-  hook: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2v11a5 5 0 1 1-10 0" fill="none" stroke-width="3" stroke-linecap="round"/><path d="M14 2l6 4" fill="none" stroke-width="3" stroke-linecap="round"/></svg>',
-  joker:
-    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c3 4.5 7 8.6 7 12.5A7 7 0 0 1 5 14.5C5 10.6 9 6.5 12 2z"/></svg>',
-  net: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18M3 10h18M3 16h18M5 2v20M12 2v20M19 2v20" fill="none" stroke-width="2"/></svg>',
+  dam: icon('booster-dam'),
+  hook: icon('booster-hook'),
+  joker: icon('booster-joker'),
+  net: icon('booster-net'),
 };
 
 export type BoosterState = 'locked' | 'ready' | 'video' | 'spent';
@@ -136,6 +134,9 @@ export class Hud {
     }
     Array.from(this.lives.children).forEach((h, i) => {
       const broken = i >= lives - lost;
+      if (h.classList.contains('broken') !== broken || h.childElementCount === 0) {
+        h.innerHTML = broken ? ICONS.heartBroken : ICONS.heart;
+      }
       h.classList.toggle('broken', broken);
       // FX-04: a heart cracks when it breaks; a whole one is ready to crack again.
       if (!broken) h.classList.remove('cracking');

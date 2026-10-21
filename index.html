@@ -69,37 +69,66 @@
         align-items: center;
         justify-content: center;
         gap: 28px;
-        background: radial-gradient(circle at 50% 40%, #6fc3e8 0%, #3b8fc0 55%, #2f6b45 100%);
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 50% 28%, rgba(255, 246, 200, 0.75) 0%, transparent 45%),
+          linear-gradient(#9fdcf5 0%, #6cc6ee 42%, #8fd16a 42.5%, #5fa848 100%);
         transition: opacity 0.25s ease-out;
+      }
+      /* A river across the meadow. */
+      #loading::before {
+        content: '';
+        position: absolute;
+        left: -60%;
+        right: -60%;
+        top: 60%;
+        height: 15%;
+        border-radius: 50%;
+        background: linear-gradient(#6fd0f2, #2f9bd4);
+        box-shadow:
+          0 -6px 0 #f2dba6,
+          0 6px 0 #f2dba6;
+        transform: rotate(-4deg);
       }
       #loading.done {
         opacity: 0;
         pointer-events: none;
       }
       .loading-title {
-        font-size: 48px;
-        font-weight: 800;
-        letter-spacing: 0.02em;
+        position: relative;
+        font-size: 54px;
+        font-weight: 900;
+        letter-spacing: 0.01em;
         color: #ffffff;
-        text-shadow: 0 3px 0 #1f5a7a;
+        text-shadow:
+          0 4px 0 #4a2f1b,
+          0 -2px 0 #4a2f1b,
+          3px 0 0 #4a2f1b,
+          -3px 0 0 #4a2f1b,
+          3px 3px 0 #4a2f1b,
+          -3px 3px 0 #4a2f1b,
+          0 10px 18px rgba(0, 0, 0, 0.25);
       }
       html[data-boot-lang='en'] .t-ru,
       html:not([data-boot-lang='en']) .t-en {
         display: none;
       }
       .loading-track {
+        position: relative;
         width: min(240px, 70vw);
-        height: 14px;
-        border-radius: 7px;
-        background: rgba(255, 255, 255, 0.3);
-        border: 2px solid #1f5a7a;
+        height: 18px;
+        border-radius: 9px;
+        background: rgba(74, 47, 27, 0.35);
+        border: 3px solid #4a2f1b;
+        box-shadow: 0 3px 0 #4a2f1b;
         overflow: hidden;
       }
       #loading-bar {
         width: 15%;
         height: 100%;
-        border-radius: 5px;
-        background: #ffd75e;
+        border-radius: 6px;
+        background: linear-gradient(#ffe17a, #ffbf2e);
+        box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.6);
         transition: width 0.3s ease-out;
       }
     </style>

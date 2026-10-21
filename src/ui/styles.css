@@ -1,3 +1,38 @@
+/*
+ * ART-01: the interface of a storybook summer village — wooden bars and signs, parchment windows,
+ * glossy "candy" buttons with a pressed edge, gold and greens. Nunito everywhere (TECH-02).
+ * Sizes that the layout checks rely on (44 px touch targets, 14 px text) are kept.
+ */
+
+:root {
+  --ink: #3d2a17;
+  --ink-soft: #6b5137;
+  --wood-light: #c98a52;
+  --wood: #a5683a;
+  --wood-dark: #7a4826;
+  --wood-deep: #4a2f1b;
+  --cream: #fff8e8;
+  --cream-2: #fbe8c2;
+  --cream-edge: #e6c98f;
+  --green-light: #8fdc63;
+  --green: #5bb944;
+  --green-dark: #2f7a2c;
+  --green-deep: #24432c;
+  --blue-light: #6ccdf0;
+  --blue: #2f9bd4;
+  --blue-dark: #1b6693;
+  --gold-light: #ffe17a;
+  --gold: #ffbf2e;
+  --gold-dark: #b8740c;
+  --orange-light: #ffb170;
+  --orange: #f07a3c;
+  --orange-dark: #a2401f;
+  --grey-light: #e3ddd2;
+  --grey: #b9b2a5;
+  --grey-dark: #7c7568;
+  --press: 4px;
+}
+
 [hidden] {
   display: none !important;
 }
@@ -12,7 +47,8 @@
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
     env(safe-area-inset-left);
   background:
-    radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.08), transparent 60%), #2f6b45;
+    radial-gradient(circle at 50% 35%, rgba(255, 240, 190, 0.18), transparent 65%),
+    linear-gradient(#5a9e4a, #2f6b45);
 }
 
 #stage {
@@ -35,6 +71,14 @@
   inset: 0;
   z-index: 2;
   pointer-events: none;
+  font-family:
+    'Nunito',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Arial,
+    sans-serif;
 }
 
 #ui > * {
@@ -42,12 +86,130 @@
   pointer-events: auto;
 }
 
+#ui button {
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ------------------------------------------------------------------ shared pieces */
+
+/* A wooden plank bar: the header of the level and of the village. */
+.hud-header,
+.village-header {
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 11px,
+      rgba(74, 47, 27, 0.18) 11px 12px,
+      transparent 12px 22px
+    ),
+    linear-gradient(#bf8550, #95592f);
+  border-bottom: 3px solid var(--wood-deep);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 236, 200, 0.35),
+    0 3px 0 rgba(40, 24, 10, 0.25);
+}
+
+/* Candy buttons: a light top, a solid edge under them, pressed on touch. */
+.modal-button,
+.village-play,
+.village-daily,
+.shop-buy,
+.settings-action,
+.switch,
+.lang,
+.rating-tab,
+.village-tab,
+.pill-button {
+  --face-top: var(--cream);
+  --face: var(--cream-2);
+  --edge: var(--wood);
+  --text: var(--wood-deep);
+  position: relative;
+  border: 3px solid var(--edge);
+  background: linear-gradient(var(--face-top), var(--face));
+  color: var(--text);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.1),
+    0 var(--press) 0 var(--edge);
+  cursor: pointer;
+  transition:
+    transform 0.06s ease-out,
+    box-shadow 0.06s ease-out;
+}
+
+.modal-button:active:not(:disabled),
+.village-play:active:not(:disabled),
+.village-daily:active,
+.shop-buy:active:not(:disabled),
+.settings-action:active,
+.switch:active,
+.lang:active,
+.rating-tab:active,
+.village-tab:active,
+.pill-button:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.1),
+    0 2px 0 var(--edge);
+}
+
+.green {
+  --face-top: var(--green-light);
+  --face: var(--green);
+  --edge: var(--green-dark);
+  --text: #ffffff;
+}
+
+.modal-button.primary,
+.village-play,
+.shop-buy,
+.settings-action,
+.switch.on,
+.lang.on,
+.rating-tab.on,
+.village-tab.on {
+  --face-top: var(--green-light);
+  --face: var(--green);
+  --edge: var(--green-dark);
+  --text: #ffffff;
+  text-shadow: 0 2px 0 rgba(31, 82, 29, 0.85);
+}
+
+.village-daily {
+  --face-top: var(--blue-light);
+  --face: var(--blue);
+  --edge: var(--blue-dark);
+  --text: #ffffff;
+  text-shadow: 0 2px 0 rgba(18, 70, 102, 0.85);
+}
+
+.modal-button:disabled,
+.village-play:disabled,
+.shop-buy:disabled {
+  --face-top: var(--grey-light);
+  --face: var(--grey);
+  --edge: var(--grey-dark);
+  --text: #ffffff;
+  text-shadow: 0 1px 0 rgba(80, 74, 64, 0.8);
+  cursor: default;
+}
+
+/* ------------------------------------------------------------------ the level header (UI-11) */
+
 .hud-header {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 0 6px;
-  background: rgba(23, 63, 40, 0.55);
+  /* The bottom plank edge is a shadow: a border would leave less than 44 px for the buttons. */
+  border-bottom: none;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 236, 200, 0.35),
+    inset 0 -3px 0 var(--wood-deep),
+    0 3px 0 rgba(40, 24, 10, 0.25);
 }
 
 .hud-button {
@@ -58,10 +220,15 @@
   height: 44px;
   padding: 0;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   background: transparent;
-  color: #ffffff;
+  color: #fff6e2;
   cursor: pointer;
+  filter: drop-shadow(0 2px 0 rgba(58, 34, 16, 0.8));
+}
+
+.hud-button:active {
+  transform: translateY(1px);
 }
 
 .hud-button svg {
@@ -77,11 +244,9 @@
 
 .hud-heart svg {
   display: block;
-  width: 24px;
-  height: 24px;
-  fill: #ff6b6b;
-  stroke: #7a1f1f;
-  stroke-width: 1.5;
+  width: 26px;
+  height: 26px;
+  filter: drop-shadow(0 2px 0 rgba(58, 34, 16, 0.6));
 }
 
 .hud-spacer {
@@ -89,24 +254,36 @@
 }
 
 .hud-combo,
-.hud-coins {
+.hud-coins,
+.pill {
   display: flex;
   align-items: center;
   gap: 4px;
   min-height: 32px;
-  padding: 0 10px;
-  border-radius: 16px;
-  background: rgba(0, 0, 0, 0.25);
+  padding: 0 10px 0 6px;
+  border-radius: 17px;
+  background: rgba(58, 32, 14, 0.55);
+  box-shadow:
+    inset 0 2px 3px rgba(0, 0, 0, 0.35),
+    0 1px 0 rgba(255, 230, 190, 0.35);
+  color: #ffffff;
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 900;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
 }
 
-.hud-coins svg {
+.hud-coins svg,
+.pill svg {
   width: 22px;
   height: 22px;
-  fill: #ffd75e;
-  stroke: #9a6a00;
 }
+
+.hud-combo {
+  padding: 0 10px;
+  color: #fff3a6;
+}
+
+/* ------------------------------------------------------------------ boosters (INP-04) */
 
 .hud-boosters {
   display: flex;
@@ -129,27 +306,41 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1px;
+  gap: 0;
   flex: 1 1 0;
   max-width: 96px;
   min-width: 44px;
   height: 44px;
   padding: 0 4px;
-  line-height: 1.1;
-  border: 2px solid #1f4d2e;
-  border-radius: 12px;
-  background: #f4e7c5;
-  color: #2b3a24;
-  font: inherit;
+  line-height: 1.05;
+  border: 3px solid var(--wood);
+  border-radius: 14px;
+  background: linear-gradient(var(--cream), var(--cream-2));
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.6),
+    0 3px 0 var(--wood);
+  color: var(--wood-deep);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
+}
+
+.hud-booster:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.6),
+    0 1px 0 var(--wood);
 }
 
 .hud-boosters.column .hud-booster {
   flex: 0 0 auto;
-  width: 52px;
-  height: 52px;
+  width: 54px;
+  height: 54px;
+}
+
+.hud-boosters.column .hud-booster svg {
+  width: 30px;
+  height: 30px;
 }
 
 .hud-boosters.column .hud-booster-label {
@@ -158,10 +349,8 @@
 
 .hud-booster svg {
   flex: 0 0 auto;
-  width: 18px;
-  height: 18px;
-  fill: #3b6fa0;
-  stroke: #3b6fa0;
+  width: 20px;
+  height: 20px;
 }
 
 .hud-booster-label {
@@ -177,30 +366,53 @@
   height: 20px;
   padding: 0 4px;
   border-radius: 10px;
-  background: #1f4d2e;
+  background: var(--green-dark);
+  box-shadow: 0 0 0 2px #ffffff;
   color: #ffffff;
   font-size: 14px;
+  font-weight: 900;
   line-height: 20px;
   text-align: center;
 }
 
-/* ---------------------------------------------------------------- Stage 2: level interface */
+.hud-booster:disabled {
+  cursor: default;
+}
 
-.hud-heart.broken svg {
-  fill: #5d4037;
+.hud-booster[data-state='locked'] {
+  border-color: var(--grey-dark);
+  background: linear-gradient(var(--grey-light), var(--grey));
+  box-shadow: 0 3px 0 var(--grey-dark);
+  color: #5d574d;
+}
+
+.hud-booster[data-state='locked'] svg {
+  fill: #6f695e;
+  stroke: #6f695e;
+}
+
+.hud-booster[data-state='spent'] {
   opacity: 0.55;
 }
 
-.hud-heart .crack {
-  stroke: transparent;
-  stroke-width: 2;
+.hud-booster[data-state='video'] .hud-booster-count {
+  background: var(--orange);
 }
 
-.hud-heart.broken .crack {
-  stroke: #fff3e0;
+.hud-booster.armed {
+  border-color: var(--green-dark);
+  background: linear-gradient(#e9ffd8, #c8f0a6);
+  box-shadow:
+    0 0 0 3px rgba(143, 220, 99, 0.9),
+    0 3px 0 var(--green-dark);
 }
 
-/* FX-04: the heart cracks. */
+/* ------------------------------------------------------------------ hearts and combo (FX-02, FX-04) */
+
+.hud-heart.broken svg {
+  opacity: 0.85;
+}
+
 .hud-heart.cracking {
   animation: heart-crack 0.6s ease-out;
 }
@@ -220,11 +432,6 @@
   }
 }
 
-.hud-combo {
-  color: #fff59d;
-}
-
-/* FX-02: the combo counter bounces. */
 .hud-combo.bounce {
   animation: combo-bounce 0.35s ease-out;
 }
@@ -241,34 +448,8 @@
   }
 }
 
-.hud-booster:disabled {
-  cursor: default;
-}
+/* ------------------------------------------------------------------ windows (UI-05) */
 
-.hud-booster[data-state='locked'] {
-  background: #d7ccb0;
-  color: #5b5446;
-}
-
-.hud-booster[data-state='locked'] svg {
-  fill: #6d6455;
-  stroke: #6d6455;
-}
-
-.hud-booster[data-state='spent'] {
-  opacity: 0.55;
-}
-
-.hud-booster[data-state='video'] .hud-booster-count {
-  background: #c62828;
-}
-
-.hud-booster.armed {
-  border-color: #2e7d32;
-  box-shadow: 0 0 0 3px #a5d6a7;
-}
-
-/* UI-05: windows over the level. */
 .modal-backdrop {
   position: absolute;
   inset: 0;
@@ -277,9 +458,10 @@
   align-items: center;
   justify-content: center;
   padding: 12px;
-  background: rgba(10, 30, 20, 0.55);
+  background: radial-gradient(circle at 50% 45%, rgba(24, 40, 20, 0.35), rgba(12, 22, 12, 0.7));
 }
 
+/* Parchment in a wooden frame. */
 .modal {
   display: flex;
   flex-direction: column;
@@ -288,18 +470,25 @@
   width: min(340px, 100%);
   max-height: 100%;
   overflow-y: auto;
-  padding: 18px 16px 16px;
-  border: 3px solid #1f4d2e;
-  border-radius: 20px;
-  background: #fdf6e3;
-  color: #24321f;
+  padding: 16px 16px 18px;
+  border: 4px solid var(--wood);
+  border-radius: 24px;
+  background:
+    radial-gradient(ellipse at 50% 0%, #fffdf6 0%, transparent 70%),
+    linear-gradient(var(--cream), #f7e2b8);
+  box-shadow:
+    inset 0 0 0 3px #fff5dc,
+    inset 0 -8px 0 rgba(165, 104, 58, 0.1),
+    0 6px 0 var(--wood-deep),
+    0 18px 40px rgba(0, 0, 0, 0.35);
+  color: var(--ink);
   text-align: center;
-  animation: modal-in 0.2s ease-out;
+  animation: modal-in 0.22s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 
 @keyframes modal-in {
   from {
-    transform: scale(0.9);
+    transform: scale(0.85);
     opacity: 0;
   }
   to {
@@ -308,23 +497,38 @@
   }
 }
 
+/* A ribbon with the title. */
 .modal-title {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 800;
-  line-height: 1.2;
+  align-self: center;
+  max-width: 100%;
+  margin: 0 0 2px;
+  padding: 6px 20px 8px;
+  border: 3px solid var(--orange-dark);
+  border-radius: 16px;
+  background: linear-gradient(var(--orange-light), var(--orange));
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.45),
+    0 3px 0 var(--orange-dark);
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1.15;
+  text-shadow: 0 2px 0 var(--orange-dark);
 }
 
 .modal-text {
   margin: 0;
+  color: var(--ink);
   font-size: 16px;
+  font-weight: 700;
   line-height: 1.35;
 }
 
 .modal-buttons {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  margin-top: 2px;
 }
 
 .modal-button {
@@ -334,25 +538,15 @@
   gap: 8px;
   min-height: 48px;
   padding: 8px 14px;
-  border: 2px solid #1f4d2e;
-  border-radius: 14px;
-  background: #ffffff;
-  color: #1f4d2e;
-  font: inherit;
-  font-size: 17px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.modal-button.primary {
-  background: #43a047;
-  color: #ffffff;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 900;
 }
 
 .modal-button svg {
   flex: 0 0 auto;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   fill: currentColor;
 }
 
@@ -360,36 +554,36 @@
 .stars {
   display: flex;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .star svg {
   display: block;
-  width: 56px;
-  height: 56px;
-  fill: #d7ccb0;
-  stroke: #8d6e63;
-  stroke-width: 1.2;
+  width: 60px;
+  height: 60px;
+  filter: grayscale(1) opacity(0.45);
+}
+
+.star:nth-child(2) svg {
+  width: 72px;
+  height: 72px;
+  margin-top: -10px;
 }
 
 .star.on svg {
-  fill: #ffc107;
-  stroke: #b26a00;
+  filter: drop-shadow(0 3px 0 rgba(122, 72, 38, 0.55));
 }
 
 .star.on {
-  animation: star-pop 0.45s ease-out both;
+  animation: star-pop 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) both;
 }
 
 @keyframes star-pop {
   0% {
-    transform: scale(0);
-  }
-  70% {
-    transform: scale(1.3);
+    transform: scale(0) rotate(-30deg);
   }
   100% {
-    transform: scale(1);
+    transform: scale(1) rotate(0);
   }
 }
 
@@ -404,22 +598,22 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: 22px;
-  font-weight: 800;
+  color: var(--wood-deep);
+  font-size: 24px;
+  font-weight: 900;
 }
 
 .complete-coins svg {
-  width: 26px;
-  height: 26px;
-  fill: #ffd54f;
-  stroke: #9a6a00;
+  width: 30px;
+  height: 30px;
 }
 
-/* UI-06 */
+/* ------------------------------------------------------------------ settings (UI-06) */
+
 .settings {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   text-align: left;
 }
 
@@ -428,38 +622,30 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 2px dashed rgba(165, 104, 58, 0.3);
 }
 
 .settings-label {
+  color: var(--ink);
   font-size: 17px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .settings-hint {
+  color: var(--ink-soft);
   font-size: 14px;
-  font-weight: 400;
-  color: #4b5a45;
+  font-weight: 600;
 }
 
 .switch,
 .lang {
-  min-width: 72px;
+  min-width: 76px;
   min-height: 44px;
   padding: 6px 12px;
-  border: 2px solid #1f4d2e;
   border-radius: 22px;
-  background: #ffffff;
-  color: #1f4d2e;
-  font: inherit;
   font-size: 15px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.switch.on,
-.lang.on {
-  background: #43a047;
-  color: #ffffff;
+  font-weight: 900;
 }
 
 .settings-langs {
@@ -471,12 +657,43 @@
 }
 
 .settings-version {
+  color: var(--ink-soft);
   font-size: 14px;
-  color: #4b5a45;
+  font-weight: 700;
   text-align: center;
 }
 
-/* TUT-01: the hand drags from one item to the other. */
+/* Low screens (a phone in a browser with its bars): the same windows, tighter. */
+@media (max-height: 640px) {
+  .modal-backdrop {
+    padding: 8px;
+  }
+
+  .modal {
+    gap: 8px;
+    padding: 10px 14px 12px;
+  }
+
+  .modal-title {
+    padding: 4px 16px 5px;
+    font-size: 19px;
+  }
+
+  .settings {
+    gap: 6px;
+  }
+
+  .settings-row {
+    padding-bottom: 6px;
+  }
+
+  .settings-hint {
+    line-height: 1.25;
+  }
+}
+
+/* ------------------------------------------------------------------ tutorial (TUT-01) */
+
 #ui > .tut-hand,
 #ui > .tut-text {
   pointer-events: none;
@@ -485,8 +702,8 @@
 .tut-hand {
   position: absolute;
   z-index: 10;
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   margin: -6px 0 0 -14px;
   animation: tut-drag 2s ease-in-out infinite;
 }
@@ -495,9 +712,9 @@
   width: 100%;
   height: 100%;
   fill: #ffffff;
-  stroke: #1f3a1f;
+  stroke: var(--wood-deep);
   stroke-width: 2;
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.35));
+  filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.35));
 }
 
 @keyframes tut-drag {
@@ -532,12 +749,14 @@
   width: max-content;
   max-width: min(320px, calc(100% - 24px));
   transform: translateX(-50%);
-  padding: 8px 14px;
-  border-radius: 14px;
-  background: rgba(253, 246, 227, 0.95);
-  color: #24321f;
+  padding: 8px 16px;
+  border: 3px solid var(--wood);
+  border-radius: 16px;
+  background: linear-gradient(var(--cream), var(--cream-2));
+  box-shadow: 0 3px 0 var(--wood);
+  color: var(--ink);
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 900;
   text-align: center;
 }
 
@@ -558,15 +777,16 @@
   font-size: 14px;
 }
 
-/* ---------------------------------------------------------------- Stage 3: village */
+/* ------------------------------------------------------------------ the village (VIL-01, UI-03) */
 
-/* VIL-01, UI-03 */
 .village {
   inset: 0;
   z-index: 5;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(#bfe6a4, #8fcf6f);
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255, 246, 200, 0.55), transparent 60%),
+    linear-gradient(#bfe59a, #7fbf5c);
 }
 
 .village-header {
@@ -576,43 +796,37 @@
   gap: 4px;
   min-height: 52px;
   padding: 4px;
-  background: rgba(23, 63, 40, 0.75);
 }
 
 /* Compact, so coins, stars, boosters and four buttons fit 360 px (UI-03). */
 .pill {
-  display: flex;
   flex: 0 0 auto;
-  align-items: center;
   gap: 3px;
   min-height: 34px;
-  padding: 0 7px;
-  border-radius: 17px;
-  background: rgba(0, 0, 0, 0.25);
-  color: #ffffff;
+  padding: 0 8px 0 5px;
   font-size: 16px;
-  font-weight: 800;
 }
 
 /* YG-14: the boosters pill that opens the shop is a 44 px button. */
 .pill-button {
+  --face-top: #d59a62;
+  --face: #b07040;
+  --edge: var(--wood-deep);
+  --text: #ffffff;
   min-height: 44px;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  font: inherit;
+  border-width: 2px;
   font-size: 16px;
-  font-weight: 800;
-  cursor: pointer;
+  font-weight: 900;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
 }
 
 .pill svg {
   width: 20px;
   height: 20px;
-  fill: #ffd54f;
-  stroke: #9a6a00;
 }
 
 .village-button svg {
-  fill: #ffffff;
+  fill: #fff6e2;
 }
 
 .village-chapters {
@@ -621,13 +835,22 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 6px 8px 0;
+  padding: 8px 8px 0;
 }
 
+/* The chapter name like a carved sign. */
 .village-chapter-title {
-  color: #1f3a1f;
-  font-size: 17px;
-  font-weight: 800;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.15;
+  text-shadow:
+    0 2px 0 var(--green-deep),
+    0 -1px 0 var(--green-deep),
+    2px 0 0 var(--green-deep),
+    -2px 0 0 var(--green-deep),
+    2px 2px 0 var(--green-deep),
+    -2px 2px 0 var(--green-deep);
 }
 
 .village-tabs {
@@ -642,31 +865,22 @@
   gap: 2px;
   min-width: 44px;
   height: 44px;
-  border: 2px solid #1f4d2e;
-  border-radius: 12px;
-  background: #fdf6e3;
-  color: #1f4d2e;
-  font: inherit;
-  font-size: 17px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.village-tab.on {
-  background: #43a047;
-  color: #ffffff;
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: 900;
 }
 
 .village-tab.locked {
-  background: #d7ccb0;
-  color: #5b5446;
+  --face-top: var(--grey-light);
+  --face: var(--grey);
+  --edge: var(--grey-dark);
+  --text: #5d574d;
 }
 
 .village-tab svg {
   width: 16px;
   height: 16px;
   fill: currentColor;
-  stroke: currentColor;
 }
 
 .village-map-wrap {
@@ -675,24 +889,32 @@
   align-items: center;
   justify-content: center;
   min-height: 0;
-  padding: 4px;
+  padding: 6px 6px 8px;
 }
 
+/* The map in a wooden frame. */
 .village-map {
   position: relative;
   flex: 0 0 auto;
   overflow: hidden;
-  border: 3px solid #2b5a33;
-  border-radius: 18px;
+  border: 4px solid var(--wood);
+  border-radius: 22px;
+  background: #8fd16a;
+  box-shadow:
+    0 0 0 2px var(--wood-deep),
+    0 5px 0 var(--wood-deep),
+    0 12px 26px rgba(40, 60, 20, 0.35);
 }
 
-.village-map > svg {
+.village-map > .village-scene {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  pointer-events: none;
 }
 
+/* Level medallions on the river. */
 .level-node {
   position: absolute;
   display: flex;
@@ -703,33 +925,71 @@
   height: calc(46px * var(--s, 1));
   padding: 0;
   transform: translate(-50%, -50%);
-  border: 3px solid #1f4d2e;
+  border: 3px solid var(--wood-deep);
   border-radius: 50%;
-  background: #fdf6e3;
-  color: #1f4d2e;
-  font: inherit;
+  background: radial-gradient(circle at 35% 30%, #fffaf0 0%, #f4dcaa 70%, #e2bf7c 100%);
+  box-shadow:
+    inset 0 -3px 0 rgba(122, 72, 38, 0.25),
+    0 3px 0 var(--wood-deep),
+    0 6px 8px rgba(20, 50, 70, 0.35);
+  color: var(--wood-deep);
   cursor: pointer;
 }
 
 .level-node .level-num {
-  font-size: max(14px, calc(17px * var(--s, 1)));
-  font-weight: 800;
+  font-size: max(14px, calc(18px * var(--s, 1)));
+  font-weight: 900;
   line-height: 1;
+}
+
+.level-node.done {
+  border-color: var(--green-dark);
+  background: radial-gradient(circle at 35% 30%, #d9ffb8 0%, #84d65e 60%, #4ea83a 100%);
+  box-shadow:
+    inset 0 -3px 0 rgba(31, 82, 29, 0.3),
+    0 3px 0 var(--green-dark),
+    0 6px 8px rgba(20, 50, 70, 0.35);
+  color: #ffffff;
+  text-shadow: 0 2px 0 var(--green-dark);
+}
+
+.level-node.next {
+  border-color: var(--gold-dark);
+  background: radial-gradient(circle at 35% 30%, #fff6c4 0%, #ffd34d 55%, #f2a51e 100%);
+  box-shadow:
+    inset 0 -3px 0 rgba(150, 90, 0, 0.3),
+    0 3px 0 var(--gold-dark),
+    0 6px 10px rgba(120, 80, 0, 0.4);
+  color: #ffffff;
+  text-shadow: 0 2px 0 var(--gold-dark);
+}
+
+.level-node.locked {
+  border-color: var(--grey-dark);
+  background: radial-gradient(circle at 35% 30%, #f1ece3 0%, #c8c1b3 70%, #a59d8f 100%);
+  box-shadow:
+    inset 0 -3px 0 rgba(0, 0, 0, 0.12),
+    0 3px 0 var(--grey-dark),
+    0 5px 6px rgba(20, 50, 70, 0.3);
+  color: #8a8376;
+  cursor: default;
 }
 
 .level-stars {
   position: absolute;
   transform: translate(-50%, calc(25px * var(--s, 1)));
   pointer-events: none;
-  color: #ffc107;
-  font-size: max(14px, calc(14px * var(--s, 1)));
+  color: var(--gold-light);
+  font-size: max(14px, calc(15px * var(--s, 1)));
   line-height: 1;
+  letter-spacing: -1px;
   white-space: nowrap;
-  text-shadow: 0 1px 0 #5a3a1e;
-}
-
-.level-node.next {
-  background: #ffd54f;
+  text-shadow:
+    0 1px 0 var(--wood-deep),
+    0 -1px 0 var(--wood-deep),
+    1px 0 0 var(--wood-deep),
+    -1px 0 0 var(--wood-deep),
+    0 2px 0 var(--wood-deep);
 }
 
 /* The next level glows: a ring under its circle (outside the button, so nothing sticks out of
@@ -737,15 +997,14 @@
    the map every frame (cheap on weak phones). Paused under a window. */
 .level-glow {
   position: absolute;
-  width: calc(66px * var(--s, 1));
-  height: calc(66px * var(--s, 1));
+  width: calc(70px * var(--s, 1));
+  height: calc(70px * var(--s, 1));
   border-radius: 50%;
-  /* A ring around the circle; its middle stays clear over the border. */
   background: radial-gradient(
     circle closest-side,
-    transparent 68%,
-    rgba(255, 213, 79, 0.65) 72%,
-    rgba(255, 213, 79, 0.25) 100%
+    transparent 64%,
+    rgba(255, 236, 140, 0.95) 70%,
+    rgba(255, 213, 79, 0.3) 100%
   );
   opacity: 0;
   animation: node-pulse 1.4s ease-in-out infinite;
@@ -754,13 +1013,6 @@
 
 #ui:has(.modal-backdrop) .level-glow {
   animation-play-state: paused;
-}
-
-.level-node.locked {
-  background: #c9c2b2;
-  color: #5b5446;
-  border-color: #6d6455;
-  cursor: default;
 }
 
 @keyframes node-pulse {
@@ -781,17 +1033,26 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-end;
   padding: 0;
   border: none;
   background: transparent;
   cursor: pointer;
 }
 
-.building > svg {
+.building > svg,
+.building > img {
   flex: 1 1 0;
   width: 100%;
   min-height: 0;
   overflow: visible;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.building:active > svg,
+.building:active > img {
+  transform: scale(0.96);
 }
 
 /* VIL-04: a short animation when restored. */
@@ -813,28 +1074,37 @@
   }
 }
 
+/* A wooden price sign; green when the coins are there. */
 .building-price {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
-  gap: 2px;
-  padding: 1px 6px;
+  gap: 3px;
+  padding: 1px 8px 2px 4px;
+  border: 2px solid var(--wood-deep);
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.55);
+  background: linear-gradient(#c98a52, #94582f);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 230, 190, 0.45),
+    0 2px 0 var(--wood-deep);
   color: #ffffff;
   font-size: max(14px, calc(14px * var(--s, 1)));
-  font-weight: 800;
+  font-weight: 900;
   white-space: nowrap;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
 }
 
 .building-price.ready {
-  background: #2e7d32;
+  border-color: var(--green-dark);
+  background: linear-gradient(var(--green-light), var(--green));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 2px 0 var(--green-dark);
 }
 
 .building-price svg {
-  width: max(14px, calc(14px * var(--s, 1)));
-  height: max(14px, calc(14px * var(--s, 1)));
-  fill: #ffd54f;
+  width: max(16px, calc(16px * var(--s, 1)));
+  height: max(16px, calc(16px * var(--s, 1)));
 }
 
 .village-bottom {
@@ -843,14 +1113,19 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 4px 12px 10px;
+  padding: 2px 12px 12px;
 }
 
 .village-message {
-  color: #1f3a1f;
+  color: #ffffff;
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 900;
   text-align: center;
+  text-shadow:
+    0 2px 0 var(--green-deep),
+    0 -1px 0 var(--green-deep),
+    1px 0 0 var(--green-deep),
+    -1px 0 0 var(--green-deep);
 }
 
 .village-actions {
@@ -864,31 +1139,23 @@
   flex: 1 1 auto;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   min-width: 0;
-  min-height: 56px;
+  min-height: 58px;
   padding: 6px 16px;
-  border: 3px solid #1f4d2e;
-  border-radius: 18px;
-  background: #43a047;
-  color: #ffffff;
-  font: inherit;
-  cursor: pointer;
-}
-
-.village-play:disabled {
-  background: #9e9e9e;
-  cursor: default;
+  border-radius: 20px;
 }
 
 .village-play-label {
-  font-size: 22px;
-  font-weight: 800;
-  line-height: 1.1;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1.05;
 }
 
 .village-play-sub {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 800;
+  opacity: 0.95;
 }
 
 /* DAY-01: the daily river button next to "Play". */
@@ -899,69 +1166,83 @@
   align-items: center;
   justify-content: center;
   min-width: 112px;
-  min-height: 56px;
+  min-height: 58px;
   padding: 4px 10px;
-  border: 3px solid #1f4d2e;
-  border-radius: 18px;
-  background: #2f80b3;
-  color: #ffffff;
-  font: inherit;
-  cursor: pointer;
+  border-radius: 20px;
 }
 
 .village-daily svg {
   width: 26px;
   height: 18px;
+  fill: #ffffff;
   stroke: #ffffff;
 }
 
 .village-daily-label {
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 900;
   line-height: 1.1;
   white-space: nowrap;
 }
 
-/* VIL-02: the building window. */
+/* ------------------------------------------------------------------ the building window (VIL-02) */
+
 .building-window {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
-.building-picture svg {
-  width: 120px;
-  height: 100px;
+.building-picture {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0 2px;
+  border-radius: 16px;
+  background: radial-gradient(ellipse at 50% 80%, #c9eea2 0%, #9fd57a 60%, transparent 61%);
+}
+
+.building-picture svg,
+.building-picture img {
+  width: 150px;
+  height: 125px;
 }
 
 .resident {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 8px 10px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 0 0 2px rgba(165, 104, 58, 0.25);
   text-align: left;
 }
 
 .resident-face {
   flex: 0 0 auto;
-  width: 56px;
-  height: 56px;
+  width: 60px;
+  height: 60px;
 }
 
 .resident-name {
+  color: var(--ink);
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .resident-line {
+  color: var(--ink-soft);
   font-size: 15px;
+  font-weight: 700;
   font-style: italic;
 }
 
 .building-need {
-  color: #8d3a2e;
+  color: #a8392a;
 }
 
-/* GD-23 */
+/* ------------------------------------------------------------------ the encyclopedia (GD-23) */
+
 .encyclopedia {
   display: flex;
   flex-direction: column;
@@ -970,36 +1251,41 @@
 }
 
 .enc-label {
+  color: var(--ink);
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .enc-cells {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 5px;
 }
 
 .enc-cell {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 44px;
   height: 44px;
   padding: 0;
-  border: 2px solid #c9bfa3;
-  border-radius: 10px;
-  background: #efe6cc;
-  color: #8d8370;
-  font: inherit;
+  border: 2px solid rgba(165, 104, 58, 0.45);
+  border-radius: 12px;
+  background: rgba(229, 205, 160, 0.55);
+  box-shadow: inset 0 2px 3px rgba(122, 72, 38, 0.2);
+  color: rgba(122, 72, 38, 0.55);
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
 }
 
 .enc-cell.known {
-  border-color: #1f4d2e;
-  background: #ffffff;
+  border-color: var(--wood);
+  background: radial-gradient(circle at 50% 40%, #ffffff, #fff1d2);
+  box-shadow:
+    inset 0 -2px 0 rgba(165, 104, 58, 0.2),
+    0 2px 0 var(--wood);
 }
 
 .enc-cell img {
@@ -1012,18 +1298,20 @@
   text-align: center;
 }
 
-/* TUT-02 */
+/* ------------------------------------------------------------------ "New" cards (TUT-02) */
+
 .intro-card {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .intro-image {
-  width: 64px;
-  height: 64px;
+  width: 72px;
+  height: 72px;
+  filter: drop-shadow(0 3px 0 rgba(122, 72, 38, 0.25));
 }
 
 /* TUT-02: a booster or a heart on a "New" card. */
@@ -1031,23 +1319,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
-  border: 3px solid #1f4d2e;
-  border-radius: 16px;
-  background: #fdf6e3;
-  color: #1f4d2e;
+  width: 72px;
+  height: 72px;
+  border: 3px solid var(--wood);
+  border-radius: 20px;
+  background: radial-gradient(circle at 40% 35%, #ffffff, var(--cream-2));
+  box-shadow: 0 3px 0 var(--wood);
+  color: var(--green-deep);
 }
 
 .intro-icon svg {
-  width: 40px;
-  height: 40px;
-  fill: currentColor;
-  stroke: currentColor;
-}
-
-.intro-icon.heart {
-  color: #e53935;
+  width: 48px;
+  height: 48px;
 }
 
 .booster-gift {
@@ -1056,35 +1339,38 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
+  color: var(--green-dark);
   font-size: 17px;
-  font-weight: 800;
-  color: #2e7d32;
+  font-weight: 900;
 }
 
 .booster-gift svg {
-  width: 22px;
-  height: 22px;
-  fill: #ffc107;
+  width: 24px;
+  height: 24px;
 }
 
+/* ------------------------------------------------------------------ notes (toast) */
+
 .toast {
-  top: 52px;
+  top: 54px;
   left: 50%;
   /* Under the windows: a note never hides a window title. */
   z-index: 15;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   max-width: calc(100% - 24px);
-  padding: 6px 12px;
+  padding: 6px 14px 6px 8px;
   transform: translateX(-50%);
-  border-radius: 14px;
-  background: rgba(253, 246, 227, 0.96);
-  color: #24321f;
+  border: 3px solid var(--wood);
+  border-radius: 18px;
+  background: linear-gradient(var(--cream), var(--cream-2));
+  box-shadow: 0 3px 0 var(--wood);
+  color: var(--ink);
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 900;
   pointer-events: none;
-  animation: modal-in 0.2s ease-out;
+  animation: modal-in 0.22s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 
 #ui > .toast {
@@ -1092,8 +1378,8 @@
 }
 
 .toast-image {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
 }
 
 /* VIL-02 (flower garden): the booster of the day and its name. */
@@ -1102,11 +1388,12 @@
   text-align: center;
 }
 
-/* YG-15: the leaderboard window. */
+/* ------------------------------------------------------------------ the leaderboard (YG-15) */
+
 .rating {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .rating-tabs {
@@ -1117,25 +1404,15 @@
 .rating-tab {
   flex: 1 1 0;
   min-height: 44px;
-  border: 2px solid #1f4d2e;
-  border-radius: 12px;
-  background: #fdf6e3;
-  color: #1f4d2e;
-  font: inherit;
+  border-radius: 14px;
   font-size: 15px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.rating-tab.on {
-  background: #43a047;
-  color: #ffffff;
+  font-weight: 900;
 }
 
 .rating-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1146,20 +1423,24 @@
   grid-template-columns: 32px 1fr auto;
   gap: 8px;
   align-items: center;
-  padding: 3px 8px;
-  border-radius: 8px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--ink);
   font-size: 15px;
+  font-weight: 700;
   text-align: left;
 }
 
 .rating-row.me {
-  background: #fff3c4;
-  font-weight: 800;
+  background: linear-gradient(#fff3b0, #ffe17a);
+  box-shadow: inset 0 0 0 2px var(--gold);
+  font-weight: 900;
 }
 
 .rating-rank {
-  color: #6d6455;
-  font-weight: 800;
+  color: var(--ink-soft);
+  font-weight: 900;
   text-align: right;
 }
 
@@ -1170,10 +1451,11 @@
 }
 
 .rating-score {
-  font-weight: 800;
+  font-weight: 900;
 }
 
-/* YG-14: the shop window. */
+/* ------------------------------------------------------------------ the shop (YG-14) */
+
 .shop {
   display: flex;
   flex-direction: column;
@@ -1184,6 +1466,10 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 8px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 0 0 2px rgba(165, 104, 58, 0.25);
   text-align: left;
 }
 
@@ -1200,13 +1486,15 @@
 }
 
 .shop-title {
+  color: var(--ink);
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .shop-desc {
-  color: #5b5446;
+  color: var(--ink-soft);
   font-size: 14px;
+  font-weight: 600;
 }
 
 .shop-buy,
@@ -1219,22 +1507,17 @@
   min-width: 88px;
   min-height: 44px;
   padding: 0 12px;
-  border: 2px solid #1f4d2e;
-  border-radius: 12px;
-  background: #43a047;
-  color: #ffffff;
-  font: inherit;
+  border-radius: 14px;
   font-size: 15px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.shop-buy:disabled {
-  background: #9e9e9e;
-  cursor: default;
+  font-weight: 900;
 }
 
 .shop-currency {
   width: 18px;
   height: 18px;
+}
+
+/* VIL-04: the painted map fills its frame. */
+img.village-scene {
+  object-fit: cover;
 }

@@ -11,32 +11,36 @@ import {
   type SimState,
 } from '../sim';
 import { computeLayout, slotRect, type FieldGeometry, type Layout } from '../ui/layout';
-import { CHAIN_COLOR, ensureTextures, itemKey, RESIDENT_KEY } from './art';
+import {
+  ATLAS,
+  badgeKey,
+  type Bounds,
+  CHAIN_COLOR,
+  frameBounds,
+  itemFit,
+  itemKey,
+  loadArt,
+  RESIDENT_KEY,
+} from './art';
+import { drawFieldBackground, drawRipple } from './field-art';
 import type { LevelSession } from './session';
 
-/** Temporary palette (ART-01); the final art arrives in Stage 5. */
+/** Colours of highlights and effects (ART-01); the field itself is a picture (field-art.ts). */
 const COLORS = {
-  background: 0x2f6b45,
-  grass: 0x8ccf68,
-  grassCell: 0x9fdc7a,
-  bankEdge: 0x5f9e45,
-  water: 0x3f9fd6,
-  waterAlt: 0x3b97cd,
-  laneLine: 0xbfe8fb,
-  outline: 0x2b5a33,
-  pond: 0x2f80b3,
-  slot: 0x58b0e0,
-  ripple: 0xffffff,
-  glow: 0xfff59d,
-  target: 0x66ff66,
-  warning: 0xff9800,
-  frozen: 0xb3e5fc,
+  glow: 0xfff3a0,
+  target: 0x7dff6a,
+  warning: 0xff8a3d,
+  frozen: 0xc8efff,
 };
 
 const RIPPLE_KEY = 'ripple';
 const RIPPLE_SIZE = 128;
-/** Item size relative to the cell. */
-const ITEM_SCALE = 0.86;
+/** Two keys for the field picture: the new one is in place before the old one goes. */
+const BG_KEYS = ['field-bg-0', 'field-bg-1'];
+/** Item frame size relative to the cell (the SVGs keep a margin and a ground shadow). */
+const ITEM_SCALE = 0.98;
+/** FX-01, ACC-01: the level badge, relative to the item frame (without the level fit). */
+const BADGE_SCALE = 0.34;
 /** Backwater items are drawn smaller (the tray is 52 px high, UI-11). */
 const SLOT_ITEM_SCALE = 0.92;
 const MOVE_MS = 180;
@@ -54,6 +58,10 @@ export interface HeldView {
 interface ItemView {
   id: number;
   sprite: Phaser.GameObjects.Image;
+  badge: Phaser.GameObjects.Image | null;
+  /** itemFit() of the item and the visible part of its picture. */
+  fit: number;
+  bounds: Bounds;
   x: number;
   y: number;
   fromX: number;
@@ -87,8 +95,8 @@ export class FieldScene extends Phaser.Scene {
   private held: HeldView | null = null;
   private hookArmed = false;
 
-  private under!: Phaser.GameObjects.Graphics;
-  private over!: Phaser.GameObjects.Graphics;
+  private bg: Phaser.GameObjects.Image | null = null;
+  private bgIndex = 0;
   private marks!: Phaser.GameObjects.Graphics;
   private ripples: Phaser.GameObjects.TileSprite[] = [];
   private frozen!: Phaser.GameObjects.Rectangle;
@@ -102,27 +110,25 @@ export class FieldScene extends Phaser.Scene {
   /** After a relayout items jump to their new cells instead of gliding. */
   private snapItems = false;
 
-  constructor(
-    private readonly residents: readonly string[],
-    private readonly onFirstFrame: () => void,
-  ) {
+  constructor(private readonly onFirstFrame: () => void) {
     super('field');
   }
 
+  preload(): void {
+    loadArt(this);
+  }
+
   create(): void {
-    ensureTextures(this, this.residents);
     this.makeRippleTexture();
     this.cameras.main.setOrigin(0, 0);
-    this.under = this.add.graphics().setDepth(0);
     this.ripples = [
       this.add.tileSprite(0, 0, 1, 1, RIPPLE_KEY).setOrigin(0).setAlpha(0.4).setDepth(1),
       this.add.tileSprite(0, 0, 1, 1, RIPPLE_KEY).setOrigin(0).setAlpha(0.2).setDepth(1),
     ];
     this.frozen = this.add.rectangle(0, 0, 1, 1, COLORS.frozen, 0).setOrigin(0).setDepth(2);
-    this.over = this.add.graphics().setDepth(2);
     this.marks = this.add.graphics().setDepth(4);
     this.ghost = this.add
-      .image(0, 0, itemKey('wood', 1))
+      .image(0, 0, ATLAS, itemKey('wood', 1))
       .setAlpha(0.3)
       .setVisible(false)
       .setDepth(4);
@@ -149,8 +155,7 @@ export class FieldScene extends Phaser.Scene {
     this.session = session;
     this.simEvents.length = 0;
     this.held = null;
-    for (const v of this.items.values()) v.sprite.destroy();
-    this.items.clear();
+    for (const v of this.items.values()) this.destroyItem(v);
     if (session) {
       const g: FieldGeometry = {
         cols: session.state.cols,
@@ -275,8 +280,8 @@ export class FieldScene extends Phaser.Scene {
           const at = this.cellCenter(e.to.col, e.to.row);
           const src = this.items.get(e.fromId);
           if (src) this.flyAway(src, at.x, at.y);
-          this.items.get(e.toId)?.sprite.destroy();
-          this.items.delete(e.toId);
+          const to = this.items.get(e.toId);
+          if (to) this.destroyItem(to);
           this.burst(at.x, at.y, CHAIN_COLOR[e.chain], 10 + e.level * 2);
           this.floatText(at.x, at.y - this.layout.cell * 0.3, `+${e.coins}`, '#fff59d');
           this.pop.add(e.id);
@@ -332,10 +337,19 @@ export class FieldScene extends Phaser.Scene {
       seen.add(item.id);
       let v = this.items.get(item.id);
       if (!v) {
-        const sprite = this.add.image(x, y, itemKey(item.chain, item.level)).setDepth(5);
+        const key = itemKey(item.chain, item.level);
+        const fit = itemFit(item.chain, item.level);
+        const sprite = this.add.image(x, y, ATLAS, key).setDepth(5);
+        // The size is set at once: the badge follows the sprite from the first frame.
+        sprite.setScale((size * fit) / sprite.width);
+        const badge =
+          item.level > 0 ? this.add.image(x, y, ATLAS, badgeKey(item.level)).setDepth(5) : null;
         v = {
           id: item.id,
           sprite,
+          badge,
+          fit,
+          bounds: frameBounds(key),
           x,
           y: y - cell * 0.6,
           fromX: x,
@@ -354,7 +368,7 @@ export class FieldScene extends Phaser.Scene {
           sprite.setScale(0.01);
           this.tweens.add({
             targets: sprite,
-            scale: { from: 0.2, to: (size / sprite.width) * 1 },
+            scale: { from: 0.2, to: (size * fit) / sprite.width },
             ease: 'Back.easeOut',
             duration: 260,
           });
@@ -418,7 +432,21 @@ export class FieldScene extends Phaser.Scene {
       v.sprite.setPosition(v.x, v.y + bob);
       v.sprite.setAngle(held ? 0 : Math.sin(time / 900 + v.phase) * 2.5);
       v.sprite.setDepth(held ? 8 : 5);
-      if (!this.tweens.isTweening(v.sprite)) v.sprite.setScale(v.size / v.sprite.width);
+      const full = (v.size * v.fit) / v.sprite.width;
+      if (!this.tweens.isTweening(v.sprite)) v.sprite.setScale(full);
+      if (v.badge) {
+        // ACC-01: the level at the top right corner of the picture itself, kept inside the cell.
+        const d = v.sprite.displayWidth;
+        const frame = v.size * (v.sprite.scaleX / full);
+        const b = v.bounds;
+        const dx = Math.min(d * (b.x + b.w - 0.5 - 0.05), frame * 0.38);
+        const dy = Math.max(d * (b.y - 0.5 + 0.05), -frame * 0.38);
+        v.badge
+          .setPosition(v.sprite.x + dx, v.sprite.y + dy)
+          .setScale((frame * BADGE_SCALE) / v.badge.width)
+          .setAlpha(v.sprite.alpha)
+          .setDepth(held ? 8.1 : 5.1);
+      }
     }
   }
 
@@ -482,9 +510,9 @@ export class FieldScene extends Phaser.Scene {
       const dragged = Math.hypot(v.x - o.x, v.y - o.y) > cell * 0.3;
       if (dragged) {
         this.ghost
-          .setTexture(itemKey(hand.chain, hand.level))
+          .setTexture(ATLAS, itemKey(hand.chain, hand.level))
           .setPosition(o.x, o.y)
-          .setScale((cell * ITEM_SCALE) / this.ghost.width)
+          .setScale((cell * ITEM_SCALE * itemFit(hand.chain, hand.level)) / this.ghost.width)
           .setVisible(true);
       } else {
         g.fillStyle(COLORS.glow, 0.5);
@@ -511,13 +539,13 @@ export class FieldScene extends Phaser.Scene {
       if (kind !== 'rock' && kind !== 'snag') continue;
       seen.add(i);
       let img = this.obstacles.get(i);
-      if (!img || img.texture.key !== kind) {
+      if (!img || img.frame.name !== kind) {
         img?.destroy();
         const p = this.cellCenter(i % s.cols, Math.floor(i / s.cols));
-        img = this.add.image(p.x, p.y, kind).setDepth(3);
+        img = this.add.image(p.x, p.y, ATLAS, kind).setDepth(3);
         this.obstacles.set(i, img);
       }
-      img.setScale((cell * 0.96) / img.width);
+      img.setScale((cell * 1.04) / img.width);
     }
     for (const [i, img] of this.obstacles) {
       if (seen.has(i)) continue;
@@ -538,17 +566,17 @@ export class FieldScene extends Phaser.Scene {
       let v = this.piers[i];
       const at = this.cellCenter(p.col, p.row);
       if (!v) {
-        const dock = this.add.image(at.x, at.y, 'pier').setDepth(3);
-        const face = this.add.image(0, 0, RESIDENT_KEY(p.resident)).setDepth(6);
-        const order = this.add.image(0, 0, itemKey('wood', 1)).setDepth(6);
+        const dock = this.add.image(at.x, at.y, ATLAS, 'pier').setDepth(3);
+        const face = this.add.image(0, 0, ATLAS, RESIDENT_KEY(p.resident)).setDepth(6);
+        const order = this.add.image(0, 0, ATLAS, itemKey('wood', 1)).setDepth(6);
         const badge = this.add
           .text(0, 0, '', {
-            fontFamily: 'system-ui, sans-serif',
-            fontStyle: '800',
+            fontFamily: 'Nunito, system-ui, sans-serif',
+            fontStyle: '900',
             fontSize: '14px',
             color: '#ffffff',
-            backgroundColor: '#1f4d2e',
-            padding: { x: 4, y: 1 },
+            backgroundColor: '#7a4826',
+            padding: { x: 5, y: 1 },
             resolution: this.dpr,
           })
           .setOrigin(1, 0)
@@ -556,7 +584,7 @@ export class FieldScene extends Phaser.Scene {
         v = { dock, face, order, badge };
         this.piers[i] = v;
       }
-      v.dock.setPosition(at.x, at.y).setScale(cell / v.dock.width);
+      v.dock.setPosition(at.x, at.y).setScale((cell * 1.1) / v.dock.width);
       v.face
         .setPosition(at.x - cell * 0.3, at.y - cell * 0.3)
         .setScale((cell * 0.42) / v.face.width);
@@ -564,9 +592,9 @@ export class FieldScene extends Phaser.Scene {
       v.order.setVisible(order !== null);
       if (order) {
         v.order
-          .setTexture(itemKey(order.chain, order.level))
+          .setTexture(ATLAS, itemKey(order.chain, order.level))
           .setPosition(at.x + cell * 0.06, at.y + cell * 0.08)
-          .setScale((cell * 0.7) / v.order.width);
+          .setScale((cell * 0.7 * itemFit(order.chain, order.level)) / v.order.width);
       }
       const left = p.orders.length - p.done;
       v.badge.setText(left > 0 ? `×${left}` : '✓');
@@ -578,8 +606,18 @@ export class FieldScene extends Phaser.Scene {
   // -------------------------------------------------------------------------------------------
   // Effects (FX-01…FX-04), temporary look
 
+  private destroyItem(v: ItemView): void {
+    this.items.delete(v.id);
+    v.sprite.destroy();
+    v.badge?.destroy();
+  }
+
   private flyAway(v: ItemView, x: number, y: number): void {
     this.items.delete(v.id);
+    if (v.badge) {
+      const b = v.badge;
+      this.tweens.add({ targets: b, alpha: 0, duration: 120, onComplete: () => b.destroy() });
+    }
     this.tweens.add({
       targets: v.sprite,
       x,
@@ -591,22 +629,37 @@ export class FieldScene extends Phaser.Scene {
     });
   }
 
-  private burst(x: number, y: number, color: number, count: number): void {
-    const p = this.add.particles(x, y, 'dot', {
-      speed: { min: 60, max: 180 },
-      lifespan: 450,
-      scale: { start: 0.8, end: 0 },
-      alpha: { start: 1, end: 0 },
-      tint: color,
-      emitting: false,
-    });
-    p.setDepth(7);
-    p.explode(count);
-    this.time.delayedCall(600, () => p.destroy());
+  /**
+   * FX-01: golden sparkles and drops in the chain's colour fly out. `drops` only: a splash of
+   * water drops (no sparkles).
+   */
+  private burst(x: number, y: number, color: number, count: number, drops = false): void {
+    const k = (this.layout.cell * 0.28) / 160;
+    const emit = (frame: string, n: number, tint: number | null, scale: number): void => {
+      const p = this.add.particles(x, y, ATLAS, {
+        frame,
+        speed: { min: 60, max: 190 },
+        lifespan: 520,
+        scale: { start: k * scale, end: 0 },
+        alpha: { start: 1, end: 0 },
+        rotate: { min: -90, max: 90 },
+        ...(tint === null ? {} : { tint }),
+        emitting: false,
+      });
+      p.setDepth(7);
+      p.explode(n);
+      this.time.delayedCall(600, () => p.destroy());
+    };
+    if (drops) {
+      emit('fx-drop', count, null, 0.8);
+      return;
+    }
+    emit('fx-sparkle', Math.ceil(count / 2), null, 1);
+    emit('fx-drop', Math.floor(count / 2), color, 0.7);
   }
 
   private splash(x: number, y: number): void {
-    this.burst(x, y, 0xe1f5fe, 18);
+    this.burst(x, y, 0xffffff, 16, true);
     const g = this.add.graphics().setDepth(7);
     g.lineStyle(3, 0xffffff, 1);
     g.strokeCircle(0, 0, this.layout.cell * 0.3);
@@ -623,12 +676,12 @@ export class FieldScene extends Phaser.Scene {
   private floatText(x: number, y: number, text: string, color: string): void {
     const t = this.add
       .text(x, y, text, {
-        fontFamily: 'system-ui, sans-serif',
-        fontStyle: '800',
-        fontSize: '18px',
+        fontFamily: 'Nunito, system-ui, sans-serif',
+        fontStyle: '900',
+        fontSize: '19px',
         color,
-        stroke: '#1f3a1f',
-        strokeThickness: 4,
+        stroke: '#4a2f1b',
+        strokeThickness: 5,
         resolution: this.dpr,
       })
       .setOrigin(0.5)
@@ -671,25 +724,8 @@ export class FieldScene extends Phaser.Scene {
   // Static field
 
   private makeRippleTexture(): void {
-    if (this.textures.exists(RIPPLE_KEY)) return;
-    const g = this.make.graphics({}, false);
-    g.lineStyle(3, COLORS.ripple, 1);
-    // Fixed crest positions keep the texture seamless when tiled.
-    const crests: [number, number, number][] = [
-      [24, 20, 10],
-      [86, 34, 12],
-      [50, 66, 9],
-      [108, 86, 10],
-      [20, 100, 12],
-      [70, 114, 8],
-    ];
-    for (const [x, y, r] of crests) {
-      g.beginPath();
-      g.arc(x, y, r, Math.PI * 1.15, Math.PI * 1.85);
-      g.strokePath();
-    }
-    g.generateTexture(RIPPLE_KEY, RIPPLE_SIZE, RIPPLE_SIZE);
-    g.destroy();
+    if (!this.textures.exists(RIPPLE_KEY))
+      this.textures.addCanvas(RIPPLE_KEY, drawRipple(RIPPLE_SIZE));
   }
 
   private relayout(): void {
@@ -700,31 +736,16 @@ export class FieldScene extends Phaser.Scene {
     const f = l.field;
     const river = { x: f.x + c, y: f.y, w: (cols - 2) * c, h: rows * c };
 
-    const g = this.under;
-    g.clear();
-    g.fillStyle(COLORS.background, 1);
-    g.fillRect(0, 0, l.width, l.height);
-    // Banks with spots for items (GD-03).
-    g.fillStyle(COLORS.grass, 1);
-    g.fillRect(f.x, f.y, c, f.h);
-    g.fillRect(f.x + f.w - c, f.y, c, f.h);
-    g.fillStyle(COLORS.grassCell, 1);
-    const inset = Math.max(2, Math.round(c * 0.06));
-    for (let row = 0; row < rows; row++) {
-      for (const col of [0, cols - 1]) {
-        g.fillRoundedRect(
-          f.x + col * c + inset,
-          f.y + row * c + inset,
-          c - 2 * inset,
-          c - 2 * inset,
-          c * 0.18,
-        );
-      }
-    }
-    for (let lane = 0; lane < cols - 2; lane++) {
-      g.fillStyle(lane % 2 === 0 ? COLORS.water : COLORS.waterAlt, 1);
-      g.fillRect(river.x + lane * c, river.y, c, river.h);
-    }
+    // ART-01: the meadow, banks, river and backwater as one picture at device resolution.
+    const key = BG_KEYS[this.bgIndex] as string;
+    this.bgIndex = 1 - this.bgIndex;
+    if (this.textures.exists(key)) this.textures.remove(key);
+    this.textures.addCanvas(key, drawFieldBackground(l, this.geometry, this.dpr));
+    if (!this.bg) this.bg = this.add.image(0, 0, key).setOrigin(0).setDepth(0);
+    else this.bg.setTexture(key);
+    this.bg.setScale(1 / this.dpr);
+    const old = BG_KEYS[this.bgIndex] as string;
+    if (this.textures.exists(old)) this.textures.remove(old);
 
     for (const [i, r] of this.ripples.entries()) {
       r.setPosition(river.x, river.y);
@@ -732,36 +753,6 @@ export class FieldScene extends Phaser.Scene {
       r.setTileScale((c / 64) * (i === 0 ? 1 : 0.7));
     }
     this.frozen.setPosition(river.x, river.y).setSize(river.w, river.h);
-
-    const o = this.over;
-    o.clear();
-    o.lineStyle(1, COLORS.laneLine, 0.35);
-    for (let lane = 1; lane < cols - 2; lane++) {
-      o.lineBetween(river.x + lane * c, river.y, river.x + lane * c, river.y + river.h);
-    }
-    o.lineStyle(3, COLORS.bankEdge, 1);
-    o.lineBetween(river.x, river.y, river.x, river.y + river.h);
-    o.lineBetween(river.x + river.w, river.y, river.x + river.w, river.y + river.h);
-    // GD-12: sources above every lane.
-    o.fillStyle(0xffffff, 0.55);
-    for (let lane = 0; lane < cols - 2; lane++) {
-      const x = river.x + (lane + 0.5) * c;
-      o.fillTriangle(x - c * 0.12, f.y + 3, x + c * 0.12, f.y + 3, x, f.y + c * 0.14);
-    }
-    o.lineStyle(3, COLORS.outline, 1);
-    o.strokeRect(f.x, f.y, f.w, f.h);
-
-    // Backwater (GD-12).
-    const b = l.backwater;
-    o.fillStyle(COLORS.pond, 1);
-    o.fillRoundedRect(b.x, b.y, b.w, b.h, 12);
-    o.lineStyle(3, COLORS.outline, 1);
-    o.strokeRoundedRect(b.x, b.y, b.w, b.h, 12);
-    o.fillStyle(COLORS.slot, 0.6);
-    for (let i = 0; i < this.geometry.backwater; i++) {
-      const s = slotRect(l, i);
-      o.fillRoundedRect(s.x, s.y, s.w, s.h, 10);
-    }
 
     // Everything placed by cell moves to the new geometry.
     for (const img of this.obstacles.values()) img.destroy();

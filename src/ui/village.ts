@@ -1,13 +1,14 @@
 import type { I18n } from '../services/I18n';
 import { el, ICONS } from './hud';
-import { buildingBox, buildingSvg, MAP_H, MAP_W, mapSvg, nodePosition } from './village-art';
+import { icon } from './icons';
+import { buildingBox, buildingHtml, MAP_H, MAP_W, mapHtml, nodePosition } from './village-art';
 
 export const VILLAGE_ICONS = {
-  book: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20v3H6.5A2.5 2.5 0 0 1 4 21.5z" opacity="0.6"/></svg>',
-  gear: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm9 3.5-.9-.3a7.5 7.5 0 0 0-.7-1.7l.4-.9-1.9-1.9-.9.4a7.5 7.5 0 0 0-1.7-.7L15 3h-3l-.3.9a7.5 7.5 0 0 0-1.7.7l-.9-.4L7.2 6.1l.4.9a7.5 7.5 0 0 0-.7 1.7L6 9v3l.9.3c.2.6.4 1.2.7 1.7l-.4.9 1.9 1.9.9-.4c.5.3 1.1.5 1.7.7l.3.9h3l.3-.9c.6-.2 1.2-.4 1.7-.7l.9.4 1.9-1.9-.4-.9c.3-.5.5-1.1.7-1.7L21 12z" transform="translate(-1.5 -1.5) scale(1.1)"/></svg>',
-  bag: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1.2 13H6.2z"/><path d="M9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke-width="2.2"/></svg>',
-  cup: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v6a5 5 0 0 1-10 0z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3" fill="none" stroke-width="2"/><path d="M11 14h2v4h3v3H8v-3h3z"/></svg>',
-  wave: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9c3-3 5 3 8 0s5 3 8 0 3-1 4 0M2 15c3-3 5 3 8 0s5 3 8 0 3-1 4 0" fill="none" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  book: icon('book'),
+  gear: icon('gear'),
+  bag: icon('bag'),
+  cup: icon('cup'),
+  wave: icon('wave'),
 } as const;
 
 export interface VillageLevel {
@@ -129,7 +130,7 @@ export class Village {
     chapters.append(this.title, this.tabs);
 
     this.wrap = el('div', 'village-map-wrap');
-    this.map = el('div', 'village-map', mapSvg());
+    this.map = el('div', 'village-map', mapHtml());
     this.map.dataset.ui = 'village-map';
     this.wrap.appendChild(this.map);
 
@@ -275,7 +276,7 @@ export class Village {
       const btn = el(
         'button',
         `building${b.restored ? ' restored' : ''}`,
-        buildingSvg(b.id, b.restored),
+        buildingHtml(b.id, b.restored),
       );
       btn.type = 'button';
       btn.dataset.ui = `building-${b.id}`;
