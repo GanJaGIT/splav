@@ -28,7 +28,7 @@
     "bench": "tsx scripts/bench.ts",
     "balance": "tsx scripts/balance.ts",
     "art": "tsx scripts/art.ts",
-    "promo": "tsx scripts/stub.ts promo 5"
+    "promo": "tsx scripts/promo.ts"
   },
   "dependencies": {
     "phaser": "4.2.1"
