@@ -470,6 +470,9 @@
   width: min(340px, 100%);
   max-height: 100%;
   overflow-y: auto;
+  /* A window taller than a short screen scrolls with the finger, the page itself does not. */
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   padding: 16px 16px 18px;
   border: 4px solid var(--wood);
   border-radius: 24px;

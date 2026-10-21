@@ -114,9 +114,17 @@ export class App {
   private restoreTimer = 0;
   private chapterShown = 1;
   private size = { w: 0, h: 0 };
+  /** UI-15, YG-20: when the first touch and the last fullscreen change were (performance.now). */
+  private firstTouchAt = -Infinity;
+  private fullscreenAt = -Infinity;
 
   constructor(private readonly p: AppParts) {
     this.i18n = p.i18n;
+    window.addEventListener('pointerdown', () => (this.firstTouchAt = performance.now()), {
+      capture: true,
+      once: true,
+    });
+    document.addEventListener('fullscreenchange', () => (this.fullscreenAt = performance.now()));
     this.hud = new Hud(p.ui, p.i18n, {
       pause: () => this.pause(),
       booster: (id) => this.boosterPressed(id),
@@ -717,6 +725,14 @@ export class App {
     this.pause();
   }
 
+  /**
+   * YG-04, YG-05: the player is still away after an ad — the tab is hidden, the focus stayed
+   * outside the game, or the platform paused it. Then the river does not start on its own.
+   */
+  private away(): boolean {
+    return this.p.audio.silenceReasons().some((r) => r !== 'ad');
+  }
+
   /** Stops the river and returns a held item (YG-04). */
   private halt(): void {
     const s = this.session;
@@ -959,7 +975,7 @@ export class App {
                   ui: 'complete-next',
                   label: this.i18n.t('complete.next'),
                   primary: true,
-                  onClick: () => void this.afterComplete(() => this.startLevel(next)),
+                  onClick: () => void this.afterComplete(() => this.startLevel(next), doubled),
                 },
               ]
             : []),
@@ -986,7 +1002,7 @@ export class App {
             ui: 'complete-village',
             label: this.i18n.t('complete.village'),
             primary: !next,
-            onClick: () => void this.afterComplete(() => this.showVillage()),
+            onClick: () => void this.afterComplete(() => this.showVillage(), doubled),
           },
           {
             ui: 'complete-replay',
@@ -1023,12 +1039,15 @@ export class App {
 
   /**
    * YG-10: "Next" and "To the village" may show a fullscreen ad first (from c1-06 on, at most once
-   * in 180 s, never with "No ads"); the next screen comes after it is closed.
+   * in 180 s, never with "No ads"); the next screen comes after it is closed. Not right after the
+   * player watched a video in this window ("Double the coins"): two ads in a row (4.4).
    */
-  private async afterComplete(go: () => void): Promise<void> {
+  private async afterComplete(go: () => void, watchedVideo = false): Promise<void> {
     if (this.p.ads.showing()) return;
-    if (this.p.ads.interstitialDue()) await this.p.ads.interstitial();
+    if (!watchedVideo && this.p.ads.interstitialDue()) await this.p.ads.interstitial();
     go();
+    // YG-04: the player left during the ad — the next level waits on its Pause window.
+    if (this.away()) this.interrupt();
   }
 
   /** DAY-02…DAY-04: the result of the day, the best of today, a booster for the first win. */
@@ -1137,7 +1156,14 @@ export class App {
     const s = this.session;
     if (!ok || !s || s.state.status !== 'lost') return;
     s.applyNow([{ type: 'continue' }]);
-    this.resume();
+    if (!this.away()) {
+      this.resume();
+      return;
+    }
+    // YG-04: the player left during the video — the level goes on from the Pause window.
+    this.modals.close();
+    this.halt();
+    this.openPause();
   }
 
   // -------------------------------------------------------------------------------------------
@@ -1206,7 +1232,10 @@ export class App {
     const ok = await this.p.ads.rewarded();
     if (ok) this.p.progress.addBooster(id, 1);
     this.updateBoosters();
-    if (this.session === s && !this.modals.current()) s.paused = false;
+    if (this.session !== s || this.modals.current()) return;
+    // YG-04: the player left during the video — the level waits on its Pause window.
+    if (this.away()) this.openPause();
+    else s.paused = false;
   }
 
   private hookTarget(ref: Ref | null): void {
@@ -1293,10 +1322,15 @@ export class App {
   /** UI-15: the active area changed; the interface follows and the level pauses. */
   stageResized(w: number, h: number): void {
     const changed = this.size.w !== 0 && (this.size.w !== w || this.size.h !== h);
+    // YG-20: the first touch turns fullscreen on (ours or the platform's), and the window grows
+    // under the player's finger — that is not leaving the game, so no Pause for it.
+    const now = performance.now();
+    const fullscreen =
+      (now - this.firstTouchAt < 1500 && this.size.w === w) || now - this.fullscreenAt < 1500;
     this.size = { w, h };
     this.hud.applyLayout(computeLayout(w, h, { cols: 7, rows: 8, backwater: 5 }));
     this.village.fit();
-    if (changed) this.interrupt();
+    if (changed && !fullscreen) this.interrupt();
     if (this.tutorial.visible()) requestAnimationFrame(() => this.moveHint());
   }
 

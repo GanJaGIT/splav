@@ -8,7 +8,16 @@ export function installInputGuards(): void {
   document.addEventListener('dragstart', prevent);
   // iOS Safari pinch gestures; double-tap zoom is off through touch-action in index.html.
   document.addEventListener('gesturestart', prevent);
-  document.addEventListener('touchmove', prevent, { passive: false });
+  // A window taller than a short screen (encyclopedia, building) scrolls with the finger.
+  document.addEventListener(
+    'touchmove',
+    (e) => {
+      const box = e.target instanceof Element ? e.target.closest('.modal') : null;
+      if (box && box.scrollHeight > box.clientHeight + 1) return;
+      e.preventDefault();
+    },
+    { passive: false },
+  );
 }
 
 /**
