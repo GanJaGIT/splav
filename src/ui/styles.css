@@ -779,13 +779,16 @@
 
 /* ------------------------------------------------------------------ the village (VIL-01, UI-03) */
 
+/* The meadow around the map: grass tufts and a few flowers, as on the level screen (ART-01). */
 .village {
   inset: 0;
   z-index: 5;
   display: flex;
   flex-direction: column;
   background:
-    radial-gradient(circle at 50% 30%, rgba(255, 246, 200, 0.55), transparent 60%),
+    radial-gradient(circle at 50% 30%, rgba(255, 246, 200, 0.5), transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cpath d='M20 44q1-7 0-11M25 44q0-9 4-13M30 44q-1-6 3-9M112 24q1-7 0-11M117 24q0-9 4-13M122 24q-1-6 3-9M146 106q1-7 0-11M151 106q0-9 4-13M156 106q-1-6 3-9M58 142q1-7 0-11M63 142q0-9 4-13M68 142q-1-6 3-9M88 84q0-7 3-10M93 84q0-8-3-11' fill='none' stroke='%23558f3f' stroke-width='2.2' stroke-linecap='round' opacity='.38'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cpath d='M40 210q0-7 3-10M45 210q0-8-3-11M196 170q1-7 0-11M201 170q0-9 4-13M206 170q-1-6 3-9M210 60q0-7 3-10M215 60q0-8-3-11' fill='none' stroke='%23558f3f' stroke-width='2.2' stroke-linecap='round' opacity='.32'/%3E%3Cg stroke='%2324432c' stroke-width='1.2'%3E%3Ccircle cx='150' cy='224' r='3.2' fill='%23fff'/%3E%3Ccircle cx='70' cy='96' r='3' fill='%23ffd23f'/%3E%3C/g%3E%3C/svg%3E"),
     linear-gradient(#bfe59a, #7fbf5c);
 }
 
