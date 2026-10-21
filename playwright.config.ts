@@ -24,6 +24,8 @@ export default defineConfig({
     trace: 'off',
     screenshot: 'only-on-failure',
   },
+  // PERF-02 is a timing: it runs alone, after everything else (perf project below).
+  testIgnore: /perf\.spec\.ts/,
   projects: [
     {
       name: 'chromium',
@@ -38,6 +40,13 @@ export default defineConfig({
     { name: 'webkit', use: { ...devices['Desktop Safari'] }, grep: /@smoke/ },
     // QA-03: everything but the smoke also runs in mobile WebKit emulation.
     { name: 'mobile-webkit', use: { ...devices['iPhone 13'] }, grepInvert: /@smoke|QA-04/ },
+    {
+      name: 'perf',
+      testIgnore: [],
+      testMatch: /perf\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], launchOptions: { args: ['--use-angle=swiftshader'] } },
+      dependencies: ['chromium', 'firefox', 'webkit', 'mobile-webkit'],
+    },
   ],
   webServer: {
     command: `npm run build:e2e && npx vite preview --mode e2e --outDir dist-e2e --port ${PORT} --strictPort`,
