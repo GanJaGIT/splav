@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" stroke-linejoin="round" stroke-linecap="round">
+<defs>
+<path id="w5b" d="M-10 92 L-10 67 Q-10 60 0 60 Q10 60 10 67 L10 92 Z"/>
+<clipPath id="w5bc"><use href="#w5b"/></clipPath>
+<g id="w5log">
+<use href="#w5b" fill="#c9884c"/>
+<g clip-path="url(#w5bc)">
+<path d="M3 50 L12 50 L12 100 L3 100 Z" fill="#a5683a"/>
+<path d="M-2 74 L-2 80 M5 66 L5 72" fill="none" stroke="#a5683a" stroke-width="2.5"/>
+<path d="M-5.5 66 L-5.5 86" fill="none" stroke="#fff" stroke-width="3" opacity=".42"/>
+</g>
+<use href="#w5b" fill="none" stroke="#4a2f1b" stroke-width="6"/>
+<ellipse cy="92" rx="10" ry="8.5" fill="#a5683a" stroke="#4a2f1b" stroke-width="5"/>
+<ellipse cy="91.6" rx="6.8" ry="5.6" fill="#f6e2b0"/>
+<ellipse cy="91.8" rx="3.5" ry="2.8" fill="none" stroke="#e0a96a" stroke-width="2"/>
+</g>
+</defs>
+<ellipse cx="64" cy="106" rx="52" ry="6.5" fill="#1d3b2a" opacity=".18"/>
+<use href="#w5log" x="22" y="1"/>
+<use href="#w5log" x="43" y="-1"/>
+<use href="#w5log" x="64" y="1.5"/>
+<use href="#w5log" x="85" y="-0.5"/>
+<use href="#w5log" x="106" y="1"/>
+<g fill="none">
+<path d="M14 67 L114 67 M14 84 L114 84" stroke="#4a2f1b" stroke-width="10"/>
+<path d="M14 67 L114 67 M14 84 L114 84" stroke="#f1c75b" stroke-width="4.5"/>
+<path d="M14 67 L114 67 M14 84 L114 84" stroke="#d9a43a" stroke-width="4.5" stroke-dasharray="2 4" stroke-linecap="butt"/>
+<path d="M16 65.6 L112 65.6 M16 82.6 L112 82.6" stroke="#fff" stroke-width="1.4" opacity=".55"/>
+</g>
+<path d="M64 80 L64 20" fill="none" stroke="#4a2f1b" stroke-width="11"/>
+<path d="M64 80 L64 20" fill="none" stroke="#c9884c" stroke-width="5"/>
+<path d="M65.5 78 L65.5 24" fill="none" stroke="#a5683a" stroke-width="2"/>
+<path d="M67 20 C78 17 88 23 102 27 C88 32 78 36 67 40 Z" fill="#e8734f"/>
+<path d="M67 33 C78 31 88 29 102 27 C88 32 78 36 67 40 Z" fill="#c4533a"/>
+<path d="M71 24 C78 23 84 24 88 26" fill="none" stroke="#fff" stroke-width="3" opacity=".5"/>
+<path d="M67 20 C78 17 88 23 102 27 C88 32 78 36 67 40 Z" fill="none" stroke="#4a2f1b" stroke-width="5"/>
+<circle cx="64" cy="16" r="4.5" fill="#e0a96a" stroke="#4a2f1b" stroke-width="4"/>
+<ellipse cx="64" cy="79" rx="8" ry="3.6" fill="#a5683a" stroke="#4a2f1b" stroke-width="4"/>
+</svg>

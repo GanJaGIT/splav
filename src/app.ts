@@ -52,7 +52,7 @@ import { computeLayout } from './ui/layout';
 import { Modals } from './ui/modal';
 import { Toast } from './ui/toast';
 import { TutorialHand } from './ui/tutorial';
-import { buildingSvg } from './ui/village-art';
+import { buildingHtml } from './ui/village-art';
 import { Village, type VillageView } from './ui/village';
 import { APP_VERSION } from './version';
 
@@ -281,7 +281,7 @@ export class App {
     const t = this.i18n;
     const restored = pr.built(id);
     const box = el('div', 'building-window');
-    const pic = el('div', 'building-picture', buildingSvg(id, true));
+    const pic = el('div', 'building-picture', buildingHtml(id, true));
     const who = el('div', 'resident');
     const face = el('img', 'resident-face');
     face.src = residentImage(def.resident);

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" stroke-linejoin="round" stroke-linecap="round">
+<defs>
+<path id="g2m" d="M30 98 C25 89 33 81 43 83 C47 75 59 74 66 79 C74 73 88 76 90 85 C100 85 103 96 96 100 C80 106 46 106 30 98 Z"/>
+<path id="g2l" d="M63 57 C56 44 38 36 25 45 C29 59 48 64 63 57 Z"/>
+<path id="g2r" d="M65 55 C70 40 89 32 102 40 C100 55 81 61 65 55 Z"/>
+<clipPath id="g2mc"><use href="#g2m"/></clipPath>
+<clipPath id="g2lc"><use href="#g2l"/></clipPath>
+<clipPath id="g2rc"><use href="#g2r"/></clipPath>
+</defs>
+<ellipse cx="64" cy="107" rx="38" ry="6" fill="#1d3b2a" opacity=".18"/>
+<path d="M64 84 C62 74 66 66 64 56" fill="none" stroke="#24432c" stroke-width="11"/>
+<path d="M64 84 C62 74 66 66 64 56" fill="none" stroke="#7cc457" stroke-width="5"/>
+<path d="M62.5 80 C61.5 74 63.5 68 62.5 62" fill="none" stroke="#a4dc6e" stroke-width="2"/>
+<use href="#g2l" fill="#a4dc6e"/>
+<g clip-path="url(#g2lc)">
+<path d="M20 50 C36 54 50 56 66 56 L66 70 L20 70 Z" fill="#7cc457"/>
+<path d="M31 46 C36 42 42 41 47 42" fill="none" stroke="#fff" stroke-width="3.5" opacity=".55"/>
+</g>
+<path d="M60 55 C52 50 42 47 33 47" fill="none" stroke="#5aa543" stroke-width="2.5"/>
+<use href="#g2l" fill="none" stroke="#24432c" stroke-width="6"/>
+<use href="#g2r" fill="#a4dc6e"/>
+<g clip-path="url(#g2rc)">
+<path d="M60 56 C76 54 90 50 106 42 L106 66 L60 66 Z" fill="#7cc457"/>
+<path d="M74 44 C80 40 86 38 92 38" fill="none" stroke="#fff" stroke-width="3.5" opacity=".55"/>
+</g>
+<path d="M68 53 C76 48 86 44 95 42" fill="none" stroke="#5aa543" stroke-width="2.5"/>
+<use href="#g2r" fill="none" stroke="#24432c" stroke-width="6"/>
+<use href="#g2m" fill="#8a5a36"/>
+<g clip-path="url(#g2mc)">
+<path d="M24 96 C50 100 80 98 106 88 L106 110 L24 110 Z" fill="#6b4126"/>
+<path d="M36 88 C40 85 45 84 50 85" fill="none" stroke="#b07f52" stroke-width="3.5"/>
+<path d="M70 82 C74 80 78 80 82 81" fill="none" stroke="#b07f52" stroke-width="3"/>
+</g>
+<ellipse cx="80" cy="92" rx="4.5" ry="3" fill="#b9b4aa" stroke="#24432c" stroke-width="3"/>
+<ellipse cx="44" cy="96" rx="3" ry="2.2" fill="#d9d6cf" stroke="#24432c" stroke-width="2.5"/>
+<circle cx="58" cy="91" r="1.6" fill="#5c3720"/><circle cx="92" cy="97" r="1.6" fill="#5c3720"/><circle cx="36" cy="93" r="1.4" fill="#5c3720"/>
+<use href="#g2m" fill="none" stroke="#24432c" stroke-width="6"/>
+</svg>

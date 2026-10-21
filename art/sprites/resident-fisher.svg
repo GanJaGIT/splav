@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+<defs>
+<radialGradient id="fiBg" cx=".38" cy=".3" r=".8"><stop offset="0" stop-color="#f4fcff"/><stop offset="1" stop-color="#a9def4"/></radialGradient>
+<clipPath id="fiD"><circle cx="64" cy="64" r="55.5"/></clipPath>
+<path id="fiF" d="M64 30C86 30 97 46 97 66C97 87 83 100 64 100C45 100 31 87 31 66C31 46 42 30 64 30Z"/>
+<clipPath id="fiFc"><use href="#fiF"/></clipPath>
+<path id="fiB" d="M2 134V118C4 104 22 97 42 95H86C106 97 124 104 126 118V134Z"/>
+<clipPath id="fiBc"><use href="#fiB"/></clipPath>
+<path id="fiBd" d="M32 60C30 77 33 91 40 101C44 108 50 112 55 111C58 116 62 117 64 116C66 117 70 116 73 111C78 112 84 108 88 101C95 91 98 77 96 60C94 71 90 78 84 80C78 82 74 80 70 82C68 84 66 85 64 85C62 85 60 84 58 82C54 80 50 82 44 80C38 78 34 71 32 60Z"/>
+<clipPath id="fiBdc"><use href="#fiBd"/></clipPath>
+</defs>
+<circle cx="64" cy="64" r="57" fill="url(#fiBg)"/>
+<path d="M19 48A47 47 0 0 1 48 19" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="4" stroke-linecap="round"/>
+<g clip-path="url(#fiD)" stroke="#4a2f1b" stroke-linejoin="round" stroke-linecap="round">
+<use href="#fiB" fill="#686735" stroke="none"/>
+<g clip-path="url(#fiBc)"><use href="#fiB" fill="#8a894b" stroke="none" transform="translate(-12 -2)"/></g>
+<use href="#fiB" fill="none" stroke-width="6"/>
+<path d="M42 95L30 112L53 108ZM86 95L98 112L75 108Z" fill="#a4a35e" stroke-width="4.5"/>
+<g fill="#f5c9a0" stroke-width="5"><ellipse cx="33" cy="70" rx="7" ry="9"/><ellipse cx="95" cy="70" rx="7" ry="9"/></g>
+<path d="M34.5 66Q31 70 34.5 74M93.5 66Q97 70 93.5 74" fill="none" stroke-width="3"/>
+<use href="#fiF" fill="#e2a679" stroke="none"/>
+<g clip-path="url(#fiFc)"><use href="#fiF" fill="#f5c9a0" stroke="none" transform="translate(-6 -5)"/></g>
+<use href="#fiF" fill="none" stroke-width="6"/>
+<g fill="#ff8fb4" opacity=".6" stroke="none"><ellipse cx="44" cy="74" rx="7" ry="4.5"/><ellipse cx="84" cy="74" rx="7" ry="4.5"/></g>
+<path d="M44 67Q50 61 56 67M72 67Q78 61 84 67" fill="none" stroke-width="4.5"/>
+<path d="M88 64L92 62M88 68L92 69M40 64L36 62M40 68L36 69" fill="none" stroke-width="2.5" stroke-opacity=".55"/>
+<use href="#fiBd" fill="#c9c6bc" stroke="none"/>
+<g clip-path="url(#fiBdc)"><use href="#fiBd" fill="#f0eee8" stroke="none" transform="translate(-5 -4)"/></g>
+<use href="#fiBd" fill="none" stroke-width="5"/>
+<path d="M42 90Q46 94 44 99M54 99Q57 103 55 107M74 99Q71 103 73 107M86 90Q82 94 84 99" fill="none" stroke="#b3afa4" stroke-width="3"/>
+<path d="M56 87.5C59 94 69 94 72 87.5C67 89 61 89 56 87.5Z" fill="#9a3a2e" stroke-width="3"/>
+<path d="M64 80C58 74 47 74 42 81C46 88 57 88 64 83C71 88 82 88 86 81C81 74 70 74 64 80Z" fill="#f4f3ef" stroke-width="4.5"/>
+<path d="M50 81Q55 83 60 81.5M68 81.5Q73 83 78 81" fill="none" stroke="#c9c6bc" stroke-width="2.5"/>
+<ellipse cx="64" cy="74" rx="7.5" ry="6.5" fill="#eba57c" stroke-width="4"/>
+<circle cx="61.3" cy="71.5" r="2.2" fill="#fff" fill-opacity=".75" stroke="none"/>
+<path d="M16 52C21 40 40 35 64 35C88 35 107 40 112 52C104 57 86 56 64 56C42 56 24 57 16 52Z" fill="#cdb479" stroke-width="5.5"/>
+<path d="M24 51C40 48.5 88 48.5 104 51" fill="none" stroke="#a88f58" stroke-width="2.5"/>
+<path d="M34 42C33 23 46 13 64 13C82 13 95 23 94 42C84 46 44 46 34 42Z" fill="#dec790" stroke-width="5.5"/>
+<path d="M80 17C89 23 93.5 31 93.5 41C90 43 86 44 82 44C84 33 84 25 80 17Z" fill="#c2a96f" stroke="none"/>
+<path d="M34.3 36C46 40 82 40 93.7 36L94 42C84 46 44 46 34 42Z" fill="#8b6a3e" stroke-width="4"/>
+<ellipse cx="49" cy="24" rx="7" ry="3.6" transform="rotate(-28 49 24)" fill="#fff" fill-opacity=".55" stroke="none"/>
+<path d="M82 42C84 33 91 29 97 31C94 36 89 40 82 42Z" fill="#ff9f5a" stroke-width="3"/>
+<path d="M82 42C80 34 82 27 88 25C89 31 87 38 82 42Z" fill="#ffd34d" stroke-width="3"/>
+<g fill="#f0eee8" stroke-width="3.5"><path d="M39 60C42 53 51 51 58 55C53 58 46 58 39 60Z"/><path d="M89 60C86 53 77 51 70 55C75 58 82 58 89 60Z"/></g>
+</g>
+<circle cx="64" cy="64" r="57" fill="none" stroke="#4a2f1b" stroke-width="5"/>
+</svg>

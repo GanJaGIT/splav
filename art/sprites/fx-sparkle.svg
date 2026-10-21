@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+<defs>
+<radialGradient id="spG" cx=".42" cy=".42" r=".6"><stop offset="0" stop-color="#fffbe8"/><stop offset=".3" stop-color="#ffe682"/><stop offset=".75" stop-color="#ffc533"/><stop offset="1" stop-color="#f0a818"/></radialGradient>
+<radialGradient id="spH" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff6c4" stop-opacity=".95"/><stop offset=".55" stop-color="#ffe27a" stop-opacity=".35"/><stop offset="1" stop-color="#ffd75e" stop-opacity="0"/></radialGradient>
+</defs>
+<circle cx="64" cy="64" r="46" fill="url(#spH)"/>
+<path d="M64 8C67.5 47 81 60.5 120 64C81 67.5 67.5 81 64 120C60.5 81 47 67.5 8 64C47 60.5 60.5 47 64 8Z" fill="url(#spG)" stroke="#e09a12" stroke-width="3" stroke-linejoin="round"/>
+<path d="M64 26C65.6 53 73 62.4 102 64C73 65.6 65.6 73 64 102C62.4 73 55 65.6 26 64C55 62.4 62.4 55 64 26Z" fill="#fff" opacity=".7"/>
+<circle cx="64" cy="64" r="7.5" fill="#fff"/>
+<path d="M100 16C101 24 104 27 112 28C104 29 101 32 100 40C99 32 96 29 88 28C96 27 99 24 100 16Z" fill="#fff6c4" stroke="#e09a12" stroke-width="2" stroke-linejoin="round"/>
+</svg>

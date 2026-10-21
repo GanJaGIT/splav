@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+<defs>
+<linearGradient id="f5a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b6889"/><stop offset=".5" stop-color="#6f98b5"/><stop offset=".78" stop-color="#e6ead6"/><stop offset="1" stop-color="#d3d9c2"/></linearGradient>
+<path id="f5b" d="M20 78C32 66 50 56 70 51C90 46 106 50 111 62C115 73 112 84 104 90C92 98 66 98 20 78Z"/>
+<clipPath id="f5c"><use href="#f5b"/></clipPath>
+</defs>
+<ellipse cx="64" cy="110" rx="50" ry="5.5" fill="#1d3b2a" opacity=".13"/>
+<g stroke="#1d4a4f" stroke-linejoin="round" stroke-linecap="round">
+<path d="M25 76C19 67 15 62 10 63C10 72 11 82 10 92C15 92 20 88 26 82Z" fill="#7ba6c4" stroke-width="5"/>
+<path d="M15 71L22 77M15 86L22 82" stroke="#3b6889" stroke-width="2.5" opacity=".7"/>
+<path d="M26 82C32 97 56 106 80 96L76 90Z" fill="#7ba6c4" stroke-width="4.5"/>
+<path d="M38 90L41 97M50 94L52 101M62 95L63 101" stroke="#3b6889" stroke-width="2.5" opacity=".6"/>
+<path d="M60 55C60 45 66 40 74 42C73 46 73 49 75 52Z" fill="#7ba6c4" stroke-width="4.5"/>
+<g clip-path="url(#f5c)" stroke="none">
+<use href="#f5b" fill="url(#f5a)"/>
+<g fill="#2b5675" opacity=".33"><ellipse cx="38" cy="72" rx="6" ry="3.4"/><ellipse cx="52" cy="63" rx="5" ry="3"/><ellipse cx="56" cy="75" rx="4" ry="2.4"/><ellipse cx="70" cy="59" rx="5" ry="3"/><ellipse cx="78" cy="70" rx="3.6" ry="2.2"/><ellipse cx="28" cy="80" rx="3.4" ry="2"/></g>
+<path d="M20 97C60 100 100 98 116 78L116 104L20 104Z" fill="#9aa48a" opacity=".3"/>
+<path d="M36 70C50 59 66 54 86 52" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" opacity=".5"/>
+</g>
+<use href="#f5b" fill="none" stroke-width="6"/>
+<path d="M80 82C73 85 72 92 76 96C83 95 86 90 86 86Z" fill="#7ba6c4" stroke-width="3.5"/>
+<path d="M113 72C108 80 98 84 88 81C98 80 106 77 113 72Z" fill="#f4c7b4" stroke-width="3.5"/>
+<path d="M109 75C116 79 120 88 117 99M101 80C98 90 90 97 78 100" fill="none" stroke-width="5.5"/>
+<path d="M109 75C116 79 120 88 117 99M101 80C98 90 90 97 78 100" fill="none" stroke="#b4cfe0" stroke-width="2"/>
+<circle cx="95" cy="63" r="6.6" fill="#fff" stroke-width="3"/>
+<circle cx="96.6" cy="64" r="3.9" fill="#1d4a4f" stroke="none"/>
+<circle cx="95.2" cy="62.3" r="1.5" fill="#fff" stroke="none"/>
+<path d="M89 61Q95 56 102 60" fill="none" stroke-width="3"/>
+</g>
+</svg>

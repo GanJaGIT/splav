@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" stroke-linejoin="round" stroke-linecap="round">
+<defs>
+<path id="w6h" d="M14 60 Q64 78 114 48 Q110 84 88 94 Q60 102 30 96 Q20 94 16 80 Z"/>
+<path id="w6i" d="M14 60 L19 53 Q64 39 114 48 Q64 78 14 60 Z"/>
+<path id="w6p" d="M0 0 C4 -7 18 -9 26 -5 Q30 0 26 5 C18 9 4 7 0 0 Z"/>
+<path id="w6s" d="M0 -9 Q1.6 -1.6 9 0 Q1.6 1.6 0 9 Q-1.6 1.6 -9 0 Q-1.6 -1.6 0 -9 Z"/>
+<clipPath id="w6hc"><use href="#w6h"/></clipPath>
+<clipPath id="w6ic"><use href="#w6i"/></clipPath>
+<clipPath id="w6pc"><use href="#w6p"/></clipPath>
+<g id="w6blade">
+<use href="#w6p" fill="#e0a96a"/>
+<g clip-path="url(#w6pc)"><path d="M-2 1 L34 1 L34 12 L-2 12 Z" fill="#c9884c"/></g>
+<path d="M6 -2.5 L20 -3.5" fill="none" stroke="#fff" stroke-width="2.5" opacity=".55"/>
+<use href="#w6p" fill="none" stroke="#4a2f1b" stroke-width="5"/>
+<path d="M2 0 L-3 0" fill="none" stroke="#4a2f1b" stroke-width="7"/>
+</g>
+</defs>
+<ellipse cx="64" cy="106" rx="50" ry="6.5" fill="#1d3b2a" opacity=".18"/>
+<use href="#w6i" fill="#7a4826"/>
+<g clip-path="url(#w6ic)">
+<path d="M10 56 Q64 40 122 48 L122 54 Q64 48 10 62 Z" fill="#a5683a"/>
+</g>
+<use href="#w6i" fill="none" stroke="#4a2f1b" stroke-width="6"/>
+<path d="M53 50 L67 48.5 L70 72 L55 73 Z" fill="#e0a96a" stroke="#4a2f1b" stroke-width="4"/>
+<path d="M44 68 L88 32 M84 68 L40 32" fill="none" stroke="#4a2f1b" stroke-width="10"/>
+<path d="M44 68 L88 32 M84 68 L40 32" fill="none" stroke="#e0a96a" stroke-width="4.5"/>
+<use href="#w6blade" transform="translate(88 32) rotate(-39.3)"/>
+<use href="#w6blade" transform="translate(40 32) rotate(-140.7) scale(1 -1)"/>
+<use href="#w6h" fill="#c9884c"/>
+<g clip-path="url(#w6hc)">
+<path d="M0 84 Q64 106 128 66 L128 128 L0 128 Z" fill="#a5683a"/>
+<path d="M17 74 Q64 92 110 62" fill="none" stroke="#a5683a" stroke-width="3"/>
+<path d="M22 86 Q64 102 100 78" fill="none" stroke="#7a4826" stroke-width="3"/>
+<path d="M24 70 Q36 75 50 77" fill="none" stroke="#fff" stroke-width="3.5" opacity=".45"/>
+</g>
+<use href="#w6h" fill="none" stroke="#4a2f1b" stroke-width="6"/>
+<path d="M14 60 Q64 78 114 48" fill="none" stroke="#4a2f1b" stroke-width="13"/>
+<path d="M14 60 Q64 78 114 48" fill="none" stroke="#ffbf2e" stroke-width="7"/>
+<path d="M17 62.6 Q64 79.6 111 51" fill="none" stroke="#e09a12" stroke-width="2.2"/>
+<path d="M22 60.5 Q50 70.5 72 68.8" fill="none" stroke="#ffd75e" stroke-width="2.6"/>
+<circle cx="113" cy="48.5" r="5" fill="#ffbf2e" stroke="#4a2f1b" stroke-width="4"/>
+<g fill="#ffd75e" stroke="#4a2f1b" stroke-width="2.5">
+<use href="#w6s" transform="translate(64 20)"/>
+<use href="#w6s" transform="translate(20 40) scale(.7)"/>
+<use href="#w6s" transform="translate(111 84) scale(.62)"/>
+</g>
+</svg>

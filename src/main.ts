@@ -1,6 +1,6 @@
 import { App } from './app';
 import { config } from './config';
-import { boosters, buildings, residents, shopProducts } from './content';
+import { boosters, buildings, shopProducts } from './content';
 import { levelOrder, levels } from './content/levels';
 import { createGame, resizeGame } from './game/createGame';
 import { dictionaries, supportedLangs } from './i18n';
@@ -16,6 +16,13 @@ import { SaveService } from './services/save';
 import { ShopService } from './services/shop';
 import { LoadingScreen } from './ui/loading';
 import { installInputGuards, Stage } from './ui/stage';
+// TECH-02, ART-01: Nunito (OFL), bundled — Cyrillic and Latin, the weights the interface uses.
+import '@fontsource/nunito/cyrillic-700.css';
+import '@fontsource/nunito/cyrillic-800.css';
+import '@fontsource/nunito/cyrillic-900.css';
+import '@fontsource/nunito/latin-700.css';
+import '@fontsource/nunito/latin-800.css';
+import '@fontsource/nunito/latin-900.css';
 import './ui/styles.css';
 
 function byId(id: string): HTMLElement {
@@ -95,7 +102,7 @@ async function main(): Promise<void> {
 
   // YG-02: LoadingAPI.ready() exactly once, when the first interactive screen is drawn.
   let ready = false;
-  const { game, scene } = createGame(fieldHost, residents, () => {
+  const { game, scene } = createGame(fieldHost, () => {
     if (ready) return;
     ready = true;
     loading.done();
