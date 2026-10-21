@@ -21,7 +21,7 @@ import {
   statSync,
   writeFileSync,
 } from 'node:fs';
-import { join } from 'node:path';
+import { isAbsolute, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium, type Browser, type Page } from '@playwright/test';
 import ffmpegPath from 'ffmpeg-static';
@@ -268,15 +268,16 @@ const HERO: Scene = {
   flashes: [{ x: 1066, y: 334, r: 100 }],
 };
 
+/** Renders a composition to release/<file>, or to an absolute path. */
 async function renderScene(browser: Browser, s: Scene, file: string): Promise<void> {
   const page = await browser.newPage({ viewport: { width: s.w, height: s.h } });
   page.on('pageerror', (e) => console.error(`promo: ${file}: ${e.message}`));
   await page.setContent(sceneHtml(s));
   await page.waitForFunction(() => document.body.dataset.ready === '1');
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
-  await page.screenshot({ path: join(OUT, file), type: 'png' });
+  await page.screenshot({ path: isAbsolute(file) ? file : join(OUT, file), type: 'png' });
   await page.close();
-  console.log(`promo: ${file}`);
+  if (!isAbsolute(file)) console.log(`promo: ${file}`);
 }
 
 async function art(browser: Browser): Promise<void> {
@@ -441,6 +442,7 @@ async function video(browser: Browser): Promise<void> {
     recordVideo: { dir: tmp, size },
   });
   const page = await context.newPage();
+  const t0 = Date.now();
   await openLevel(page, 'c2-06', 'ru');
   await page.evaluate(() => window.__game?.grant(400));
   // Cut away: the level starts and the river fills up.
@@ -466,29 +468,40 @@ async function video(browser: Browser): Promise<void> {
   await page.locator('[data-ui="building-pier"]').click();
   await wait(800);
   await page.locator('[data-ui="building-restore"]').click();
-  await wait(3600);
-  await page.setContent(sceneHtml(titleCard('ru')));
-  await page.waitForFunction(() => document.body.dataset.ready === '1');
-  await wait(3200);
+  await wait(4200);
   const tEnd = Date.now();
+  // The recorder runs a few seconds behind on a busy machine: let it catch up before closing.
+  await wait(3000);
   const recorded = page.video();
   await context.close();
   const webm = await recorded?.path();
   if (!webm) throw new Error('no video recorded');
-  // Cut from the end of the recording: the title is the last 3 seconds, whatever the recorder's
-  // own start-up delay was.
-  const length = Math.min(28, (tEnd - tStart) / 1000);
+  // The game part is cut from the start of the level; the title is a still picture of 3 seconds
+  // after it (the recorder skips the frames of a page set with setContent).
+  const from = (tStart - t0) / 1000;
+  const length = Math.min(25, (tEnd - tStart) / 1000);
+  const title = join(tmp, 'title.png');
+  await renderScene(browser, titleCard('ru'), title);
   const out = join(OUT, 'video-16x9.mp4');
+  const norm = 'fps=30,scale=1280:720,setsar=1,format=yuv420p';
   const res = spawnSync(
     ffmpeg,
     [
       '-y',
-      '-sseof',
-      (-length).toFixed(2),
+      '-ss',
+      from.toFixed(2),
       '-i',
       webm,
+      '-loop',
+      '1',
       '-t',
-      length.toFixed(2),
+      '3',
+      '-i',
+      title,
+      '-filter_complex',
+      `[0:v]${norm},trim=duration=${length.toFixed(2)}[g];[1:v]${norm},fade=t=in:st=0:d=0.4[t];[g][t]concat=n=2:v=1:a=0[v]`,
+      '-map',
+      '[v]',
       '-c:v',
       'libx264',
       '-pix_fmt',
@@ -497,8 +510,6 @@ async function video(browser: Browser): Promise<void> {
       'slow',
       '-crf',
       '20',
-      '-r',
-      '30',
       '-an',
       '-movflags',
       '+faststart',
@@ -507,7 +518,7 @@ async function video(browser: Browser): Promise<void> {
     { stdio: 'inherit' },
   );
   if (res.status !== 0) throw new Error('ffmpeg failed');
-  console.log(`promo: video-16x9.mp4 (${length.toFixed(1)} s)`);
+  console.log(`promo: video-16x9.mp4 (${(length + 3).toFixed(1)} s)`);
 }
 
 // ---------------------------------------------------------------------------------------------
