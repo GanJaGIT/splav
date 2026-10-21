@@ -226,7 +226,7 @@ function cover(lang: string): Scene {
     riverW: 210,
     sprites: [
       { name: 'pier', x: 702, y: 190, size: 150 },
-      { name: 'resident-fisher', x: 650, y: 132, size: 82 },
+      { name: 'resident-fisher', x: 662, y: 132, size: 82 },
       { name: 'item-fish-5', x: 726, y: 214, size: 92, rot: -4 },
       { name: 'item-garden-3', x: 160, y: 300, size: 110, rot: -8 },
       { name: 'item-garden-3', x: 262, y: 322, size: 110, rot: 6 },
@@ -240,7 +240,7 @@ function cover(lang: string): Scene {
       text: TITLES[lang] as string,
       x: 44,
       y: 46,
-      size: lang === 'ru' ? 112 : 96,
+      size: lang === 'ru' ? 112 : 86,
       anchor: 'start',
     },
   };
@@ -298,15 +298,42 @@ function titleCard(lang: string): Scene {
       { name: 'item-garden-4', x: 230, y: 470, size: 170, rot: -8 },
       { name: 'item-wood-6', x: 640, y: 540, size: 290, rot: -4 },
       { name: 'item-fish-6', x: 1010, y: 500, size: 180, rot: 8 },
-      { name: 'pier', x: 1150, y: 300, size: 200 },
-      { name: 'resident-fisher', x: 1080, y: 225, size: 110 },
+      { name: 'pier', x: 1170, y: 330, size: 190 },
+      { name: 'resident-fisher', x: 1108, y: 262, size: 100 },
     ],
     flashes: [{ x: 230, y: 470, r: 120 }],
     title: {
       text: TITLES[lang] as string,
       x: 0,
       y: 110,
-      size: lang === 'ru' ? 190 : 160,
+      // "Merge River" is twice as long as «Сплав»: smaller, clear of the villager on the right.
+      size: lang === 'ru' ? 190 : 124,
+      anchor: 'middle',
+    },
+  };
+}
+
+/** The same title for the vertical video (9:16, §9 — desirable). */
+function titleCardTall(lang: string): Scene {
+  return {
+    w: 720,
+    h: 1280,
+    river: 'M -80 820 C 200 700, 520 960, 800 800',
+    riverW: 320,
+    sprites: [
+      { name: 'pier', x: 560, y: 560, size: 200 },
+      { name: 'resident-fisher', x: 492, y: 482, size: 108 },
+      { name: 'item-garden-4', x: 140, y: 800, size: 150, rot: -8 },
+      { name: 'item-wood-6', x: 380, y: 880, size: 270, rot: -4 },
+      { name: 'item-fish-6', x: 610, y: 860, size: 150, rot: 8 },
+      { name: 'item-stone-6', x: 130, y: 1110, size: 140, rot: -6 },
+    ],
+    flashes: [{ x: 140, y: 800, r: 110 }],
+    title: {
+      text: TITLES[lang] as string,
+      x: 0,
+      y: 220,
+      size: lang === 'ru' ? 150 : 104,
       anchor: 'middle',
     },
   };
@@ -401,49 +428,89 @@ const SHOTS: { level: string; play: number; combo: number }[] = [
   { level: 'c3-11', play: 22, combo: 1 },
 ];
 
+const LANGS = ['ru', 'en'];
+
+/** §9, п. 5.1.3: every language gets its own screenshots and videos (its texts, its title). */
 async function screens(browser: Browser): Promise<void> {
   const devices = [
     { name: 'desktop', viewport: { width: 1920, height: 1080 }, scale: 1, touch: false },
     // 360×640 at DPR 3: a 1080×1920 phone screenshot.
     { name: 'mobile', viewport: { width: 360, height: 640 }, scale: 3, touch: true },
   ];
-  for (const d of devices) {
-    const context = await browser.newContext({
-      viewport: d.viewport,
-      deviceScaleFactor: d.scale,
-      isMobile: d.touch,
-      hasTouch: d.touch,
-    });
-    const page = await context.newPage();
-    for (const [i, shot] of SHOTS.entries()) {
-      await openLevel(page, shot.level, 'ru');
-      await warmUp(page, shot.play);
-      const file = join(OUT, 'screens', `${d.name}-${i + 1}.png`);
-      await shootMerge(page, file, shot.combo);
-      await page.evaluate(() => window.__game?.bot(null));
-      console.log(`promo: screens/${d.name}-${i + 1}.png`);
+  for (const lang of LANGS) {
+    for (const d of devices) {
+      const context = await browser.newContext({
+        viewport: d.viewport,
+        deviceScaleFactor: d.scale,
+        isMobile: d.touch,
+        hasTouch: d.touch,
+      });
+      const page = await context.newPage();
+      for (const [i, shot] of SHOTS.entries()) {
+        await openLevel(page, shot.level, lang);
+        await warmUp(page, shot.play);
+        const name = `screens/${lang}/${d.name}-${i + 1}.png`;
+        await shootMerge(page, join(OUT, name), shot.combo);
+        await page.evaluate(() => window.__game?.bot(null));
+        console.log(`promo: ${name}`);
+      }
+      await context.close();
     }
-    await context.close();
   }
 }
 
 /**
- * §9 video, 16:9, at most 28 s: the river flows (0–3 s), merges, cascades and combos (3–18 s),
- * orders delivered and a building restored in the village (18–25 s), the title (25–28 s).
+ * §9 video, 16:9 (and 9:16), at most 28 s: the river flows (0–3 s), merges, cascades, combos and
+ * deliveries (3–20 s), a building restored in the village (20–24 s), the title (the last 3 s).
+ * The level takes more than 70% of the time (п. 5.1.1.3).
  */
-async function video(browser: Browser): Promise<void> {
+interface VideoFormat {
+  lang: string;
+  file: string;
+  viewport: { width: number; height: number };
+  scale: number;
+  mobile: boolean;
+  /** The size of the MP4. */
+  size: { width: number; height: number };
+  title: Scene;
+}
+
+const VIDEOS: VideoFormat[] = LANGS.flatMap((lang) => [
+  {
+    lang,
+    file: `video-16x9-${lang}.mp4`,
+    viewport: { width: 1280, height: 720 },
+    scale: 1,
+    mobile: false,
+    size: { width: 1280, height: 720 },
+    title: titleCard(lang),
+  },
+  {
+    lang,
+    file: `video-9x16-${lang}.mp4`,
+    viewport: { width: 360, height: 640 },
+    scale: 2,
+    mobile: true,
+    size: { width: 720, height: 1280 },
+    title: titleCardTall(lang),
+  },
+]);
+
+async function video(browser: Browser, f: VideoFormat): Promise<void> {
   const ffmpeg = ffmpegPath as unknown as string | null;
   if (!ffmpeg) throw new Error('ffmpeg-static has no binary for this platform');
   const tmp = join(ROOT, 'test-results', 'promo-video');
   rmSync(tmp, { recursive: true, force: true });
-  const size = { width: 1280, height: 720 };
   const context = await browser.newContext({
-    viewport: size,
-    recordVideo: { dir: tmp, size },
+    viewport: f.viewport,
+    deviceScaleFactor: f.scale,
+    isMobile: f.mobile,
+    hasTouch: f.mobile,
+    recordVideo: { dir: tmp, size: f.size },
   });
   const page = await context.newPage();
   const t0 = Date.now();
-  await openLevel(page, 'c2-06', 'ru');
+  await openLevel(page, 'c2-06', f.lang);
   await page.evaluate(() => window.__game?.grant(400));
   // Cut away: the level starts and the river fills up.
   await page.evaluate(() => {
@@ -451,7 +518,7 @@ async function video(browser: Browser): Promise<void> {
     window.__game?.bot('novice');
   });
   await wait(9000);
-  // 0–3 s: the river flows; 3–18 s: the deft bot merges, combos and delivers.
+  // 0–3 s: the river flows; 3–20 s: the deft bot merges, combos and delivers.
   const tStart = Date.now();
   await page.evaluate(() => window.__game?.setSpeed(1));
   await wait(3000);
@@ -459,16 +526,17 @@ async function video(browser: Browser): Promise<void> {
     window.__game?.setSpeed(1.25);
     window.__game?.bot('deft');
   });
-  await wait(14_000);
+  await wait(17_000);
   await page.evaluate(() => {
     window.__game?.bot(null);
     window.__game?.village();
   });
-  await wait(1000);
+  await wait(600);
   await page.locator('[data-ui="building-pier"]').click();
-  await wait(800);
+  await wait(500);
   await page.locator('[data-ui="building-restore"]').click();
-  await wait(4200);
+  // The building changes, then its window thanks the player (VIL-04).
+  await wait(2700);
   const tEnd = Date.now();
   // The recorder runs a few seconds behind on a busy machine: let it catch up before closing.
   await wait(3000);
@@ -479,11 +547,11 @@ async function video(browser: Browser): Promise<void> {
   // The game part is cut from the start of the level; the title is a still picture of 3 seconds
   // after it (the recorder skips the frames of a page set with setContent).
   const from = (tStart - t0) / 1000;
-  const length = Math.min(25, (tEnd - tStart) / 1000);
+  const length = Math.min(24.8, (tEnd - tStart) / 1000);
   const title = join(tmp, 'title.png');
-  await renderScene(browser, titleCard('ru'), title);
-  const out = join(OUT, 'video-16x9.mp4');
-  const norm = 'fps=30,scale=1280:720,setsar=1,format=yuv420p';
+  await renderScene(browser, f.title, title);
+  const out = join(OUT, f.file);
+  const norm = `fps=30,scale=${f.size.width}:${f.size.height},setsar=1,format=yuv420p`;
   const res = spawnSync(
     ffmpeg,
     [
@@ -518,7 +586,7 @@ async function video(browser: Browser): Promise<void> {
     { stdio: 'inherit' },
   );
   if (res.status !== 0) throw new Error('ffmpeg failed');
-  console.log(`promo: video-16x9.mp4 (${(length + 3).toFixed(1)} s)`);
+  console.log(`promo: ${f.file} (${(length + 3).toFixed(1)} s)`);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -542,7 +610,9 @@ function videoInfo(file: string): string {
 function report(): void {
   const files = [
     ...readdirSync(OUT).filter((f) => /\.(png|mp4|zip)$/.test(f)),
-    ...readdirSync(join(OUT, 'screens')).map((f) => `screens/${f}`),
+    ...LANGS.flatMap((lang) =>
+      readdirSync(join(OUT, 'screens', lang)).map((f) => `screens/${lang}/${f}`),
+    ),
   ].sort();
   console.log('\nfile                          size                         weight');
   for (const f of files) {
@@ -597,6 +667,11 @@ function drafts(): string[] {
       if (limit && (n < limit[1] || n > limit[2])) {
         problems.push(`draft-${lang}: ${name}: ${n}, needs ${limit[1]}–${limit[2]}`);
       }
+      // The console may count a line break as two characters (CRLF): keep that margin too.
+      const breaks = text.split('\n').length - 1;
+      if (limit && !list && breaks > 0 && n + breaks > limit[2]) {
+        problems.push(`draft-${lang}: ${name}: ${n + breaks} with CRLF, needs ≤ ${limit[2]}`);
+      }
       if (BANNED.test(text)) problems.push(`draft-${lang}: ${name}: a banned word`);
       if (/^(Название|Title)/.test(name) && /игр|game/i.test(text)) {
         problems.push(`draft-${lang}: the title has "игра"/"game"`);
@@ -623,14 +698,24 @@ function drafts(): string[] {
 }
 
 async function main(): Promise<void> {
-  mkdirSync(join(OUT, 'screens'), { recursive: true });
+  for (const lang of LANGS) mkdirSync(join(OUT, 'screens', lang), { recursive: true });
   const browser = await chromium.launch({ args: ['--use-angle=swiftshader'] });
   let server: ChildProcess | null = null;
   try {
     if (want('art')) await art(browser);
+    // A look at the video titles without recording (test-results/promo-titles/).
+    if (only?.includes('titles')) {
+      for (const f of VIDEOS) {
+        await renderScene(
+          browser,
+          f.title,
+          join(ROOT, 'test-results', 'promo-titles', `${f.file}.png`),
+        );
+      }
+    }
     if (want('screens') || want('video')) server = await startServer();
     if (want('screens')) await screens(browser);
-    if (want('video')) await video(browser);
+    if (want('video')) for (const f of VIDEOS) await video(browser, f);
   } finally {
     await browser.close();
     if (server) stopServer(server);
