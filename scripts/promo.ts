@@ -13,6 +13,7 @@
 
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
 import {
+  copyFileSync,
   existsSync,
   mkdirSync,
   readdirSync,
@@ -279,6 +280,29 @@ async function renderScene(browser: Browser, s: Scene, file: string): Promise<vo
   await page.close();
   if (!isAbsolute(file)) console.log(`promo: ${file}`);
 }
+
+/** The README banner (docs/media). */
+const BANNER: Scene = {
+  w: 1280,
+  h: 420,
+  river: 'M -80 300 C 260 220, 620 400, 960 300 S 1240 230, 1380 270',
+  riverW: 190,
+  sprites: [
+    { name: 'pier', x: 130, y: 150, size: 150 },
+    { name: 'resident-gardener', x: 80, y: 95, size: 82 },
+    { name: 'item-garden-5', x: 152, y: 170, size: 90 },
+    { name: 'item-garden-3', x: 300, y: 292, size: 100, rot: -6 },
+    { name: 'item-garden-3', x: 392, y: 314, size: 100, rot: 6 },
+    { name: 'item-wood-6', x: 640, y: 332, size: 170, rot: -4 },
+    { name: 'item-fish-6', x: 900, y: 300, size: 110, rot: 8 },
+    { name: 'item-stone-6', x: 1062, y: 268, size: 100 },
+    { name: 'pier', x: 1170, y: 140, size: 150 },
+    { name: 'resident-fisher', x: 1120, y: 85, size: 82 },
+    { name: 'item-fish-5', x: 1192, y: 162, size: 90 },
+  ],
+  flashes: [{ x: 346, y: 302, r: 80 }],
+  title: { text: TITLES.ru as string, x: 0, y: 40, size: 130, anchor: 'middle' },
+};
 
 async function art(browser: Browser): Promise<void> {
   await renderScene(browser, ICON, 'icon-512.png');
@@ -697,6 +721,105 @@ function drafts(): string[] {
   return problems;
 }
 
+/**
+ * The README pictures (docs/media): the banner and the icon, a gameplay GIF and phone frames from
+ * the promo files of `npm run promo`, and the village from the e2e build.
+ */
+async function media(browser: Browser): Promise<void> {
+  const ffmpeg = ffmpegPath as unknown as string | null;
+  if (!ffmpeg) throw new Error('ffmpeg-static has no binary for this platform');
+  const dir = join(ROOT, 'docs', 'media');
+  mkdirSync(dir, { recursive: true });
+  await renderScene(browser, BANNER, join(dir, 'banner.png'));
+  await renderScene(browser, ICON, join(dir, 'icon.png'));
+  const run = (args: string[]): void => {
+    const res = spawnSync(ffmpeg, ['-v', 'error', '-y', ...args], { stdio: 'inherit' });
+    if (res.status !== 0) throw new Error(`ffmpeg failed: ${args.join(' ')}`);
+  };
+  // The phone video, 3–11 s: merges, a combo and the whirlpool, as a small looping GIF.
+  run([
+    '-ss',
+    '3',
+    '-t',
+    '8',
+    '-i',
+    join(OUT, 'video-9x16-ru.mp4'),
+    '-vf',
+    'fps=12,scale=270:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=4',
+    '-loop',
+    '0',
+    join(dir, 'gameplay.gif'),
+  ]);
+  for (const [from, to] of [
+    ['mobile-2', 'phone-level'],
+    ['mobile-3', 'phone-combo'],
+  ]) {
+    run([
+      '-i',
+      join(OUT, 'screens', 'ru', `${from}.png`),
+      '-vf',
+      'scale=405:-1:flags=lanczos',
+      join(dir, `${to}.png`),
+    ]);
+  }
+  // The village with some progress: seven levels with stars, the pier and the shed restored.
+  const levels = Object.fromEntries(
+    [3, 3, 2, 3, 2, 3, 1].map((stars, i) => [`c1-0${i + 1}`, { stars }]),
+  );
+  const preset = { v: 1, updatedAt: 1, levels, coins: 1350, buildings: ['pier', 'shed'] };
+  for (const shot of [
+    {
+      file: 'phone-village.png',
+      viewport: { width: 360, height: 640 },
+      scale: 2,
+      touch: true,
+      open: '',
+    },
+    {
+      file: 'phone-building.png',
+      viewport: { width: 360, height: 640 },
+      scale: 2,
+      touch: true,
+      open: 'building-mill',
+    },
+    {
+      file: 'village.png',
+      viewport: { width: 1280, height: 720 },
+      scale: 1,
+      touch: false,
+      open: '',
+    },
+  ]) {
+    const context = await browser.newContext({
+      viewport: shot.viewport,
+      deviceScaleFactor: shot.scale,
+      isMobile: shot.touch,
+      hasTouch: shot.touch,
+    });
+    await context.addInitScript((data) => {
+      if (!localStorage.getItem('splav.save'))
+        localStorage.setItem('splav.save', JSON.stringify(data));
+    }, preset);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/?lang=ru`);
+    await page.waitForFunction(() => window.__game?.isReady() === true);
+    await page.addStyleTag({ content: '.toast { display: none !important; }' });
+    if (shot.open) await page.locator(`[data-ui="${shot.open}"]`).click();
+    await wait(1200);
+    const raw = join(ROOT, 'test-results', 'promo-media', shot.file);
+    await page.screenshot({ path: raw, type: 'png' });
+    await context.close();
+    run([
+      '-i',
+      raw,
+      '-vf',
+      `scale=${shot.touch ? 405 : 1100}:-1:flags=lanczos`,
+      join(dir, shot.file),
+    ]);
+    console.log(`promo: docs/media/${shot.file}`);
+  }
+}
+
 async function main(): Promise<void> {
   for (const lang of LANGS) mkdirSync(join(OUT, 'screens', lang), { recursive: true });
   const browser = await chromium.launch({ args: ['--use-angle=swiftshader'] });
@@ -713,15 +836,22 @@ async function main(): Promise<void> {
         );
       }
     }
-    if (want('screens') || want('video')) server = await startServer();
+    if (want('screens') || want('video') || only?.includes('media')) server = await startServer();
     if (want('screens')) await screens(browser);
     if (want('video')) for (const f of VIDEOS) await video(browser, f);
+    // Not part of the store set: only on request (--only=media).
+    if (only?.includes('media')) await media(browser);
   } finally {
     await browser.close();
     if (server) stopServer(server);
   }
   report();
   const problems = drafts();
+  // The store texts of this release are kept in the repository too (release/ is not).
+  mkdirSync(join(ROOT, 'docs', 'store'), { recursive: true });
+  for (const f of ['draft-ru.md', 'draft-en.md', 'UPLOAD.md']) {
+    if (existsSync(join(OUT, f))) copyFileSync(join(OUT, f), join(ROOT, 'docs', 'store', f));
+  }
   for (const p of problems) console.error(`promo: ${p}`);
   if (problems.length > 0) process.exitCode = 1;
   else console.log('promo: draft texts — limits, banned words, repeats: OK');
