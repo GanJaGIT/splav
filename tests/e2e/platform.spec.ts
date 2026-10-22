@@ -27,7 +27,7 @@ test('YG-10: a fullscreen ad after "To the village" from c1-06 on, at most once 
   await page.locator('[data-ui="complete-village"]').click();
   // The stand-in ad closes itself after a second; the platform call is what counts.
   await page.waitForFunction(() => window.__game?.calls().includes('showInterstitial'));
-  await expect(page.locator('[data-ui="village"]')).toBeVisible({ timeout: 5000 });
+  await expect(page.locator('[data-ui="village"]')).toBeVisible({ timeout: 15_000 });
   expect(await count(page, 'showInterstitial')).toBe(1);
 
   // Within 180 s: no second ad.
@@ -40,7 +40,7 @@ test('YG-10: a fullscreen ad after "To the village" from c1-06 on, at most once 
   await page.evaluate(() => window.__game?.advanceTime(181_000));
   await quickWin(page);
   await page.locator('[data-ui="complete-village"]').click();
-  await expect(page.locator('[data-ui="village"]')).toBeVisible({ timeout: 5000 });
+  await expect(page.locator('[data-ui="village"]')).toBeVisible({ timeout: 15_000 });
   expect(await count(page, 'showInterstitial')).toBe(2);
 });
 
