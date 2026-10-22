@@ -512,13 +512,58 @@ const VIDEOS: VideoFormat[] = LANGS.flatMap((lang) => [
   {
     lang,
     file: `video-9x16-${lang}.mp4`,
-    viewport: { width: 360, height: 640 },
-    scale: 2,
+    // The recorder takes CSS pixels and does not scale up: the window is recorded at its own
+    // size and ffmpeg brings it to 720×1280.
+    viewport: { width: 540, height: 960 },
+    scale: 1,
     mobile: true,
     size: { width: 720, height: 1280 },
     title: titleCardTall(lang),
   },
 ]);
+
+/**
+ * 8.3.1: the picture fills the whole frame. A quarter of the frame that is plain grey (the
+ * recorder's background) means the page was recorded smaller than the video.
+ */
+function checkFilled(ffmpeg: string, file: string): void {
+  for (const t of [4, 12]) {
+    for (const [x, y] of [
+      [0, 0],
+      [1, 0],
+      [0, 1],
+      [1, 1],
+    ]) {
+      const res = spawnSync(
+        ffmpeg,
+        [
+          '-v',
+          'error',
+          '-ss',
+          String(t),
+          '-i',
+          file,
+          '-frames:v',
+          '1',
+          '-vf',
+          `crop=iw/2:ih/2:${x}*iw/2:${y}*ih/2,scale=1:1:flags=area`,
+          '-f',
+          'rawvideo',
+          '-pix_fmt',
+          'rgb24',
+          '-',
+        ],
+        { encoding: 'buffer' },
+      );
+      const [r = 0, g = 0, b = 0] = res.stdout;
+      if (Math.max(r, g, b) - Math.min(r, g, b) < 12) {
+        throw new Error(
+          `${file}: at ${t} s a quarter of the frame is plain grey — the picture does not fill it`,
+        );
+      }
+    }
+  }
+}
 
 async function video(browser: Browser, f: VideoFormat): Promise<void> {
   const ffmpeg = ffmpegPath as unknown as string | null;
@@ -530,7 +575,7 @@ async function video(browser: Browser, f: VideoFormat): Promise<void> {
     deviceScaleFactor: f.scale,
     isMobile: f.mobile,
     hasTouch: f.mobile,
-    recordVideo: { dir: tmp, size: f.size },
+    recordVideo: { dir: tmp, size: f.viewport },
   });
   const page = await context.newPage();
   const t0 = Date.now();
@@ -610,6 +655,7 @@ async function video(browser: Browser, f: VideoFormat): Promise<void> {
     { stdio: 'inherit' },
   );
   if (res.status !== 0) throw new Error('ffmpeg failed');
+  checkFilled(ffmpeg, out);
   console.log(`promo: ${f.file} (${(length + 3).toFixed(1)} s)`);
 }
 
@@ -745,7 +791,7 @@ async function media(browser: Browser): Promise<void> {
     '-i',
     join(OUT, 'video-9x16-ru.mp4'),
     '-vf',
-    'fps=12,scale=270:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=4',
+    'fps=10,scale=270:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=96:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle',
     '-loop',
     '0',
     join(dir, 'gameplay.gif'),
@@ -838,7 +884,10 @@ async function main(): Promise<void> {
     }
     if (want('screens') || want('video') || only?.includes('media')) server = await startServer();
     if (want('screens')) await screens(browser);
-    if (want('video')) for (const f of VIDEOS) await video(browser, f);
+    // --video=9x16 (or =en, =16x9-ru): only the videos whose file name has it.
+    const pick = arg('video');
+    if (want('video'))
+      for (const f of VIDEOS) if (!pick || f.file.includes(pick)) await video(browser, f);
     // Not part of the store set: only on request (--only=media).
     if (only?.includes('media')) await media(browser);
   } finally {
