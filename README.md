@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <b>https://yandex.ru/games/app/637053?draft=true&lang=ru</b>
+  <b>https://yandex.ru/games/app/637053?draft=true&lang=ru</b><br>
   <b>Merge-головоломка на реке для Яндекс Игр.</b><br>
   Река несёт брёвна, цветы, камни и рыбу — сливайте одинаковые, пока их не унесло, выполняйте заказы жителей и отстраивайте деревню.
 </p>
